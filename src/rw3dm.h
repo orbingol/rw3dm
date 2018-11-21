@@ -1,11 +1,15 @@
-#ifndef READ_3DM_H
-#define READ_3DM_H
+#ifndef RW3DM_H
+#define RW3DM_H
 
 #include <iostream>
+#include <string>
+
 #include <opennurbs_public.h>
 
 #include "rw3dm_export.h"
 
-void RW3DM_EXPORT test_function(int);
 
-#endif /* READ_3DM_H */
+bool RW3DM_EXPORT read_3dm(std::string);
+bool RW3DM_EXPORT write_3dm(std::string);
+
+#endif /* RW3DM_H */

@@ -1,6 +1,11 @@
-#include "read_3dm.h"
+#include "rw3dm.h"
 
-void test_function(int func_input)
+bool read_3dm(std::string file_name)
 {
-	std::cout << func_input << std::endl;
+	return true;
+}
+
+bool write_3dm(std::string file_name)
+{
+	return true;
 }
