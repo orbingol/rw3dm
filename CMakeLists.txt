@@ -30,7 +30,7 @@ set(RW3DM_LIB_SRC
   src/rw3dm.h
   src/rw3dm.cpp
 )
-pybind11_add_module(rw3dm SHARED ${RW3DM_LIB_SRC})
+pybind11_add_module(rw3dm MODULE ${RW3DM_LIB_SRC})
 generate_export_header(rw3dm)
 target_include_directories(rw3dm PRIVATE ${PROJECT_BINARY_DIR})
 target_compile_definitions(rw3dm
@@ -39,12 +39,3 @@ target_compile_definitions(rw3dm
 target_link_libraries(rw3dm PRIVATE opennurbs)
 set_target_properties(rw3dm PROPERTIES DEBUG_POSTFIX "_d")
 install(TARGETS rw3dm DESTINATION ${RW3DM_INSTALL_DIR})
-
-# Testing application
-set(RW3DM_APP_SRC
-  app/main.cpp
-)
-add_executable(rw3dmapp ${RW3DM_APP_SRC})
-set_target_properties(rw3dmapp PROPERTIES DEBUG_POSTFIX "_d")
-target_link_libraries(rw3dmapp PRIVATE rw3dm)
-install(TARGETS rw3dmapp DESTINATION ${RW3DM_INSTALL_DIR})
