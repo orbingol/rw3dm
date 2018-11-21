@@ -24,10 +24,8 @@ include_directories(3rdparty/opennurbs)
 # 3DM Reading and Writing Library
 set(RW3DM_LIB_SRC
   ${PROJECT_BINARY_DIR}/rw3dm_export.h
-  src/read_3dm.h
-  src/read_3dm.cpp
-  src/write_3dm.h
-  src/write_3dm.cpp
+  src/rw3dm.h
+  src/rw3dm.cpp
 )
 add_library(rw3dm SHARED ${RW3DM_LIB_SRC})
 generate_export_header(rw3dm)
