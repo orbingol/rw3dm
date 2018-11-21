@@ -11,5 +11,4 @@ RW3DM is a Python module for reading and writing Rhino 3DM files in Python.
 
 ## Tested with
 
-* Visual Studio 2015
 * Visual Studio 2017
