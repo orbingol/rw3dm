@@ -1,0 +1,3 @@
+[submodule "3rdparty/opennurbs"]
+	path = 3rdparty/opennurbs
+	url = https://github.com/mcneel/opennurbs.git
