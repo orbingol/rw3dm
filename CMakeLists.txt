@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.12)
 project(RW3DM)
 
-# Required for GenerateExportHeader module
+# Required for "generate_export_header"
 include(GenerateExportHeader)
 
 # Generate a Visual Studio filter "CMakePredefinedTargets"
@@ -17,9 +17,12 @@ set(CMAKE_INSTALL_PREFIX ${RW3DM_INSTALL_DIR})
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 14)
 
+# Add Python
+find_package(PythonLibs REQUIRED)
+include_directories(${PYTHON_INCLUDE_DIRS})
+
 # Add 3rd party libraries
 add_subdirectory(3rdparty/)
-include_directories(3rdparty/opennurbs)
 
 # 3DM Reading and Writing Library
 set(RW3DM_LIB_SRC
@@ -27,12 +30,14 @@ set(RW3DM_LIB_SRC
   src/rw3dm.h
   src/rw3dm.cpp
 )
-add_library(rw3dm SHARED ${RW3DM_LIB_SRC})
+pybind11_add_module(rw3dm SHARED ${RW3DM_LIB_SRC})
 generate_export_header(rw3dm)
-set_target_properties(rw3dm PROPERTIES DEBUG_POSTFIX "_d")
-target_compile_definitions(rw3dm PRIVATE -DOPENNURBS_IMPORTS)  # OpenNURBS dynamic linking
 target_include_directories(rw3dm PRIVATE ${PROJECT_BINARY_DIR})
+target_compile_definitions(rw3dm
+  PRIVATE -DOPENNURBS_IMPORTS   # OpenNURBS dynamic linking
+)
 target_link_libraries(rw3dm PRIVATE opennurbs)
+set_target_properties(rw3dm PROPERTIES DEBUG_POSTFIX "_d")
 install(TARGETS rw3dm DESTINATION ${RW3DM_INSTALL_DIR})
 
 # Testing application
