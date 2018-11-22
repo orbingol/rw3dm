@@ -86,11 +86,44 @@ bool writeONFile(py::list &data, std::string file_name)
 void _readCurve(const ON_Geometry* geometry, py::dict &data)
 {
     // We know that "geometry" is a curve object
-    ON_Curve *geoCurve = (ON_Curve *)geometry;
+    const ON_Curve *curve = (ON_Curve *)geometry;
 
+    // Construct the dictionary
+    _constructDict(curve, data);
+}
+
+void _readSurface(const ON_Geometry* geometry, py::dict &data)
+{
+    // We know that "geometry" is a surface object
+    const ON_Surface *surface = (ON_Surface *)geometry;
+
+    // Construct the dictionary
+    _constructDict(surface, data);
+}
+
+void _readBrep(const ON_Geometry* geometry, py::list &data)
+{
+    ON_Brep *geo = (ON_Brep *)geometry;
+    unsigned int brepFaceIndex = 0;
+    ON_BrepFace *face;
+    while (face = geo->Face(brepFaceIndex))
+    {
+        const ON_Surface *faceSurf = face->SurfaceOf();
+        if (faceSurf)
+        {
+            py::dict dataDict;
+            _constructDict(faceSurf, dataDict);
+            data.append(dataDict);
+        }
+        brepFaceIndex++;
+    }
+}
+
+void _constructDict(const ON_Curve *curve, py::dict &data)
+{
     // Try to get the NURBS form of the curve object
     ON_NurbsCurve nurbsCurve;
-    if (geoCurve->NurbsCurve(&nurbsCurve))
+    if (curve->NurbsCurve(&nurbsCurve))
     {
         // Get degree
         data["degree"] = nurbsCurve.Degree();
@@ -132,14 +165,11 @@ void _readCurve(const ON_Geometry* geometry, py::dict &data)
     }
 }
 
-void _readSurface(const ON_Geometry* geometry, py::dict &data)
+void _constructDict(const ON_Surface *surf, py::dict &data)
 {
-    // We know that "geometry" is a surface object
-    ON_Surface *geoSurface = (ON_Surface *)geometry;
-
     // Try to get the NURBS form of the surface object
     ON_NurbsSurface nurbsSurface;
-    if (geoSurface->NurbsSurface(&nurbsSurface))
+    if (surf->NurbsSurface(&nurbsSurface))
     {
         // Get degrees
         data["degree_u"] = nurbsSurface.Degree(0);
@@ -194,21 +224,5 @@ void _readSurface(const ON_Geometry* geometry, py::dict &data)
         data["size_u"] = sizeU;
         data["size_v"] = sizeV;
         data["control_points"] = controlPoints;
-    }
-}
-
-void _readBrep(const ON_Geometry* geometry, py::list &data)
-{
-    ON_Brep *geo = (ON_Brep *)geometry;
-    unsigned int brepFaceIndex = 0;
-    ON_BrepFace *face;
-    while (face = geo->Face(brepFaceIndex))
-    {
-        const ON_Surface *faceSurf = face->SurfaceOf();
-        if (faceSurf)
-        {
-            py::print("Succesfully read brep face surface!");
-        }
-        brepFaceIndex++;
     }
 }
