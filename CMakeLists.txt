@@ -47,3 +47,22 @@ target_compile_definitions(rw3dm
 target_link_libraries(rw3dm PRIVATE opennurbs)
 set_target_properties(rw3dm PROPERTIES DEBUG_POSTFIX "_d")
 install(TARGETS rw3dm DESTINATION ${RW3DM_INSTALL_DIR})
+
+#
+# Generate __init__.py file
+#
+
+# Custom target to generate __init__py.file
+add_custom_target(generate_init_py
+  COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/__init__.py
+)
+
+# Add generate_init_py target as a dependency to the main python module
+add_dependencies(rw3dm generate_init_py)
+
+# Install __init__.py to the module/app directory
+install(
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/__init__.py
+  DESTINATION ${RW3DM_INSTALL_DIR}
+)
+
