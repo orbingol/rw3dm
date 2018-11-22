@@ -29,6 +29,7 @@ set(RW3DM_LIB_SRC
   ${PROJECT_BINARY_DIR}/rw3dm_export.h
   src/rw3dm.h
   src/rw3dm.cpp
+  src/bindings.cpp
 )
 pybind11_add_module(rw3dm MODULE ${RW3DM_LIB_SRC})
 generate_export_header(rw3dm)

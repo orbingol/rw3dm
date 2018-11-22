@@ -7,9 +7,15 @@
 #include <pybind11/pybind11.h>
 #include <opennurbs_public.h>
 
-#include "rw3dm_export.h"
+namespace py = pybind11;
 
-bool RW3DM_EXPORT read_3dm(std::string);
-bool RW3DM_EXPORT write_3dm(std::string);
+void startON();
+void stopON();
+bool readONFile(std::string, py::list &);
+bool writeONFile(py::list &, std::string);
+
+void _readCurve(const ON_Geometry *);
+void _readSurface(const ON_Geometry *);
+void _readBrep(const ON_Geometry *);
 
 #endif /* RW3DM_H */
