@@ -14,7 +14,7 @@ set(RW3DM_INSTALL_PREFIX ${PROJECT_BINARY_DIR}/install CACHE PATH "Install prefi
 set(RW3DM_MODULE_NAME "rw3dm" CACHE STRING "Python module name")
 
 # Set python module install directory
-set(RW3DM_INSTALL_DIR ${PROJECT_BINARY_DIR}/install CACHE INTERNAL "Python module installation directory")
+set(RW3DM_INSTALL_DIR ${RW3DM_INSTALL_PREFIX}/${RW3DM_MODULE_NAME} CACHE INTERNAL "Python module installation directory")
 set(CMAKE_INSTALL_PREFIX ${RW3DM_INSTALL_DIR})
 
 # Set C++ standard
