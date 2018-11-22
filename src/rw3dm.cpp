@@ -98,29 +98,25 @@ void _readCurve(const ON_Geometry* geometry, py::dict &data)
         // Get knot vector
         py::list knotVector;
         for (int idx = 0; idx < nurbsCurve.KnotCount(); idx++)
-        {
             knotVector.append(nurbsCurve.Knot(idx));
-        }
         data["knotvector"] = knotVector;
 
         py::dict controlPoints;
 
         // Get control points
-        int num_coords = nurbsCurve.IsRational() ? nurbsCurve.CVSize() - 1 : nurbsCurve.CVSize();
+        int numCoords = nurbsCurve.IsRational() ? nurbsCurve.CVSize() - 1 : nurbsCurve.CVSize();
         py::list points;
         for (int idx = 0; idx < nurbsCurve.CVCount(); idx++)
         {
             double *vertex = nurbsCurve.CV(idx);
             py::list point;
-            for (int c = 0; c < num_coords; c++)
-            {
+            for (int c = 0; c < numCoords; c++)
                 point.append(vertex[c]);
-            }
             points.append(point);
         }
         controlPoints["points"] = points;
 
-        // Check if the NURBS curve is rational, i.e. weights exist as the last row of control points
+        // Check if the NURBS curve is rational
         if (nurbsCurve.IsRational())
         {
             // Get weights
@@ -128,13 +124,12 @@ void _readCurve(const ON_Geometry* geometry, py::dict &data)
             for (int idx = 0; idx < nurbsCurve.CVCount(); idx++)
             {
                 double *vertex = nurbsCurve.CV(idx);
-                weights.append(vertex[num_coords - 1]);
+                weights.append(vertex[numCoords - 1]);
             }
             controlPoints["weights"] = weights;
         }
         data["control_points"] = controlPoints;
     }
-    //py::print("Succesfully read curve object!");
 }
 
 void _readSurface(const ON_Geometry* geometry, py::dict &data)
