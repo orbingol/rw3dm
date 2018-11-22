@@ -1,38 +1,45 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(RW3DM)
 
-# Required for "generate_export_header"
-include(GenerateExportHeader)
-
 # Generate a Visual Studio filter "CMakePredefinedTargets"
 if(MSVC)
   set_property(GLOBAL PROPERTY USE_FOLDERS ON)
   set(PREDEFINED_TARGETS_FOLDER "CustomTargets")
 endif()
 
-# Set install directory
-set(RW3DM_INSTALL_DIR ${PROJECT_BINARY_DIR}/install CACHE PATH "Installation directory")
+# Set install prefix
+set(RW3DM_INSTALL_PREFIX ${PROJECT_BINARY_DIR}/install CACHE PATH "Install prefix")
+
+# Set python module name
+set(RW3DM_MODULE_NAME "rw3dm" CACHE STRING "Python module name")
+
+# Set python module install directory
+set(RW3DM_INSTALL_DIR ${PROJECT_BINARY_DIR}/install CACHE INTERNAL "Python module installation directory")
 set(CMAKE_INSTALL_PREFIX ${RW3DM_INSTALL_DIR})
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 14)
 
-# Add Python
+# Add python libraries
 find_package(PythonLibs REQUIRED)
 include_directories(${PYTHON_INCLUDE_DIRS})
 
 # Add 3rd party libraries
 add_subdirectory(3rdparty/)
 
-# 3DM Reading and Writing Library
-set(RW3DM_LIB_SRC
-  ${PROJECT_BINARY_DIR}/rw3dm_export.h
+#
+# OpenNURBS/Rhino .3DM file reading and writing library
+#
+
+# Set source files
+set(RW3DM_MODULE_SRC
   src/rw3dm.h
   src/rw3dm.cpp
   src/bindings.cpp
 )
-pybind11_add_module(rw3dm MODULE ${RW3DM_LIB_SRC})
-generate_export_header(rw3dm)
+
+# Generate python module with pybind11
+pybind11_add_module(rw3dm MODULE ${RW3DM_MODULE_SRC})
 target_include_directories(rw3dm PRIVATE ${PROJECT_BINARY_DIR})
 target_compile_definitions(rw3dm
   PRIVATE -DOPENNURBS_IMPORTS   # OpenNURBS dynamic linking
