@@ -139,7 +139,67 @@ void _readCurve(const ON_Geometry* geometry, py::dict &data)
 
 void _readSurface(const ON_Geometry* geometry, py::dict &data)
 {
-    py::print("Succesfully read surface object!");
+    // We know that "geometry" is a surface object
+    ON_Surface *geoSurface = (ON_Surface *)geometry;
+
+    // Try to get the NURBS form of the surface object
+    ON_NurbsSurface nurbsSurface;
+    if (geoSurface->NurbsSurface(&nurbsSurface))
+    {
+        // Get degrees
+        data["degree_u"] = nurbsSurface.Degree(0);
+        data["degree_v"] = nurbsSurface.Degree(1);
+
+        // Get knot vectors
+        py::list knotVectorU;
+        for (int idx = 0; idx < nurbsSurface.KnotCount(0); idx++)
+            knotVectorU.append(nurbsSurface.Knot(0, idx));
+        data["knotvector_u"] = knotVectorU;
+
+        py::list knotVectorV;
+        for (int idx = 0; idx < nurbsSurface.KnotCount(1); idx++)
+            knotVectorV.append(nurbsSurface.Knot(1, idx));
+        data["knotvector_v"] = knotVectorV;
+
+        py::dict controlPoints;
+
+        // Get control points
+        int numCoords = nurbsSurface.IsRational() ? nurbsSurface.CVSize() - 1 : nurbsSurface.CVSize();
+        int sizeU = nurbsSurface.CVCount(0);
+        int sizeV = nurbsSurface.CVCount(1);
+        py::list points;
+        for (int idxU = 0; idxU < sizeU; idxU++)
+        {
+            for (int idxV = 0; idxU < sizeV; idxV++)
+            {
+                double *vertex = nurbsSurface.CV(idxU, idxV);
+                py::list point;
+                for (int c = 0; c < numCoords; c++)
+                    point.append(vertex[c]);
+                points.append(point);
+            }
+        }
+        controlPoints["points"] = points;
+
+        // Check if the NURBS surface is rational
+        if (nurbsSurface.IsRational())
+        {
+            // Get weights
+            py::list weights;
+            for (int idxU = 0; idxU < sizeU; idxU++)
+            {
+                for (int idxV = 0; idxU < sizeV; idxV++)
+                {
+                    double *vertex = nurbsSurface.CV(idxU, idxV);
+                    weights.append(vertex[numCoords - 1]);
+                }
+                controlPoints["weights"] = weights;
+            }
+        }
+        data["size_u"] = sizeU;
+        data["size_v"] = sizeV;
+        data["control_points"] = controlPoints;
+    }
 }
 
 void _readBrep(const ON_Geometry* geometry, py::list &data)
