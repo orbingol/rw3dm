@@ -14,8 +14,8 @@ void stopON();
 bool readONFile(std::string, py::list &);
 bool writeONFile(py::list &, std::string);
 
-void _readCurve(const ON_Geometry *);
-void _readSurface(const ON_Geometry *);
-void _readBrep(const ON_Geometry *);
+void _readCurve(const ON_Geometry *, py::dict &);
+void _readSurface(const ON_Geometry *, py::dict &);
+void _readBrep(const ON_Geometry *, py::list &);
 
 #endif /* RW3DM_H */

@@ -46,20 +46,23 @@ bool readONFile(std::string file_name, py::list &data)
                 const ON_Geometry *geometry = geometryComp.Geometry((ON_Geometry *)nullptr);
                 if (geometry != nullptr)
                 {
+                    py::dict contentDict;
                     switch (geometry->ObjectType())
                     {
                     case ON::curve_object:
-                        _readCurve(geometry);
+                        _readCurve(geometry, contentDict);
                         break;
                     case ON::surface_object:
-                        _readSurface(geometry);
+                        _readSurface(geometry, contentDict);
                         break;
                     case ON::brep_object:
-                        _readBrep(geometry);
+                        _readBrep(geometry, data);
                         break;
                     default:
                         break;
-                    }                        
+                    }
+                    if (contentDict.size() > 0)
+                        data.append(contentDict);
                 }
             }
         }
@@ -80,17 +83,17 @@ bool writeONFile(py::list &data, std::string file_name)
     return true;
 }
 
-void _readCurve(const ON_Geometry* geometry)
+void _readCurve(const ON_Geometry* geometry, py::dict &data)
 {
     py::print("Succesfully read curve object!");
 }
 
-void _readSurface(const ON_Geometry* geometry)
+void _readSurface(const ON_Geometry* geometry, py::dict &data)
 {
     py::print("Succesfully read surface object!");
 }
 
-void _readBrep(const ON_Geometry* geometry)
+void _readBrep(const ON_Geometry* geometry, py::list &data)
 {
     ON_Brep *geo = (ON_Brep *)geometry;
     unsigned int brepFaceIndex = 0;
