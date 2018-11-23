@@ -130,6 +130,9 @@ void _constructDict(const ON_Curve *curve, py::dict &data)
         // Set shape type
         data["shape_type"] = "curve";
 
+        // We don't know if we have a rational curve
+        data["rational"] = false;
+
         // Get degree
         data["degree"] = nurbsCurve.Degree();
 
@@ -165,6 +168,9 @@ void _constructDict(const ON_Curve *curve, py::dict &data)
                 weights.append(vertex[numCoords - 1]);
             }
             controlPoints["weights"] = weights;
+
+            // We have a rational curve
+            data["rational"] = true;
         }
         data["control_points"] = controlPoints;
     }
@@ -178,6 +184,9 @@ void _constructDict(const ON_Surface *surf, py::dict &data)
     {
         // Set shape type
         data["shape_type"] = "surface";
+
+        // We don't know if we have a rational surface
+        data["rational"] = false;
 
         // Get degrees
         data["degree_u"] = nurbsSurface.Degree(0);
@@ -228,6 +237,9 @@ void _constructDict(const ON_Surface *surf, py::dict &data)
                 }
             }
             controlPoints["weights"] = weights;
+
+            // We have a rational surface
+            data["rational"] = true;
         }
         data["size_u"] = sizeU;
         data["size_v"] = sizeV;
