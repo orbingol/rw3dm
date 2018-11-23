@@ -38,9 +38,7 @@ bool readONFile(std::string file_name, py::list &data)
         while (model.IncrementalReadModelGeometry(archive, true, true, true, 0, mCompRef))
         {
             // Check if there are any models to read
-            if (mCompRef.IsEmpty())
-                break;
-            else
+            if (!mCompRef.IsEmpty())
             {
                 const ON_ModelGeometryComponent &geometryComp = model.ModelGeometryComponentFromId(mCompRef.ModelComponentId());
                 const ON_Geometry *geometry = geometryComp.Geometry((ON_Geometry *)nullptr);
