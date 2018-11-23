@@ -195,7 +195,7 @@ void _constructDict(const ON_Surface *surf, py::dict &data)
         py::list points;
         for (int idxU = 0; idxU < sizeU; idxU++)
         {
-            for (int idxV = 0; idxU < sizeV; idxV++)
+            for (int idxV = 0; idxV < sizeV; idxV++)
             {
                 double *vertex = nurbsSurface.CV(idxU, idxV);
                 py::list point;
@@ -213,7 +213,7 @@ void _constructDict(const ON_Surface *surf, py::dict &data)
             py::list weights;
             for (int idxU = 0; idxU < sizeU; idxU++)
             {
-                for (int idxV = 0; idxU < sizeV; idxV++)
+                for (int idxV = 0; idxV < sizeV; idxV++)
                 {
                     double *vertex = nurbsSurface.CV(idxU, idxV);
                     weights.append(vertex[numCoords - 1]);
