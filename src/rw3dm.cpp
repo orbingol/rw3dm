@@ -226,8 +226,8 @@ void _constructDict(const ON_Surface *surf, py::dict &data)
                     double *vertex = nurbsSurface.CV(idxU, idxV);
                     weights.append(vertex[numCoords - 1]);
                 }
-                controlPoints["weights"] = weights;
             }
+            controlPoints["weights"] = weights;
         }
         data["size_u"] = sizeU;
         data["size_v"] = sizeV;
