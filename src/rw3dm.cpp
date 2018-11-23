@@ -12,14 +12,11 @@ void stopON()
 
 bool readONFile(std::string file_name, py::list &data)
 {
-    // Create log object
-    ON_TextLog error_log;
-
-    // Read file
+    // Open file
     FILE* fp = ON::OpenFile(file_name.c_str(), "rb");
     if (!fp)
     {
-        py::print("Cannot open file");
+        py::print("Cannot open file: " + file_name);
         return false;
     }
 
@@ -27,47 +24,52 @@ bool readONFile(std::string file_name, py::list &data)
     ON_BinaryFile archive(ON::archive_mode::read3dm, fp);
 
     ONX_Model model;
+
+    // Start reading the model archive
     unsigned int tableFilter = ON::curve_object | ON::surface_object;
-    bool isModelReadStart = model.IncrementalReadBegin(archive, true, tableFilter, &error_log);
-
-    // TO-DO: Print error log here
-
-    if (isModelReadStart)
+    if (!model.IncrementalReadBegin(archive, true, tableFilter, (ON_TextLog *)nullptr))
     {
-        ON_ModelComponentReference mCompRef;
-        while (model.IncrementalReadModelGeometry(archive, true, true, true, 0, mCompRef))
+        py::print("Problem in start reading the model archive");
+        return false;
+    }
+
+    // Read models
+    ON_ModelComponentReference mCompRef;
+    while (model.IncrementalReadModelGeometry(archive, true, true, true, 0, mCompRef))
+    {
+        // Check if there are any models to read
+        if (!mCompRef.IsEmpty())
         {
-            // Check if there are any models to read
-            if (!mCompRef.IsEmpty())
+            const ON_ModelGeometryComponent &geometryComp = model.ModelGeometryComponentFromId(mCompRef.ModelComponentId());
+            const ON_Geometry *geometry = geometryComp.Geometry((ON_Geometry *)nullptr);
+            if (geometry != nullptr)
             {
-                const ON_ModelGeometryComponent &geometryComp = model.ModelGeometryComponentFromId(mCompRef.ModelComponentId());
-                const ON_Geometry *geometry = geometryComp.Geometry((ON_Geometry *)nullptr);
-                if (geometry != nullptr)
+                switch (geometry->ObjectType())
                 {
-                    switch (geometry->ObjectType())
-                    {
-                    case ON::curve_object:
-                        _readCurve(geometry, data);
-                        break;
-                    case ON::surface_object:
-                        _readSurface(geometry, data);
-                        break;
-                    case ON::brep_object:
-                        _readBrep(geometry, data);
-                        break;
-                    default:
-                        break;
-                    }
+                case ON::curve_object:
+                    _readCurve(geometry, data);
+                    break;
+                case ON::surface_object:
+                    _readSurface(geometry, data);
+                    break;
+                case ON::brep_object:
+                    _readBrep(geometry, data);
+                    break;
+                default:
+                    break;
                 }
             }
         }
     }
 
-    bool isModelReadFinish = model.IncrementalReadFinish(archive, true, tableFilter, &error_log);
+    // Finish reading the model archive
+    if (!model.IncrementalReadFinish(archive, true, tableFilter, (ON_TextLog *)nullptr))
+    {
+        py::print("Problem in finish reading the model archive");
+        return false;
+    }
 
-    // TO-DO: Print error log here
-
-    // close the file
+    // Close file
     ON::CloseFile(fp);
 
     return true;
