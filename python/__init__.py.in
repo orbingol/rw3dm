@@ -1,0 +1,2 @@
+__version__ = "${RW3DM_VERSION_STRING}"
+__license__ = "MIT"

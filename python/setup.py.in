@@ -1,0 +1,27 @@
+from setuptools import setup
+from os import path
+from io import open
+
+
+here = path.abspath(path.dirname(__file__))
+
+# Get the long description from the README file
+with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+  long_description = f.read()
+
+# Package configuration
+data = dict(
+  name="${RW3DM_MODULE_NAME}",
+  version="${RW3DM_VERSION_STRING}",
+  description="Read and write OpenNURBS/Rhino .3DM files in Python",
+  long_description=long_description,
+  long_description_content_type="text/markdown",
+  url="https://github.com/orbingol/rw3dm",
+  author="Onur Rauf Bingol",
+  author_email="nurbs-python@googlegroups.com",
+  packages=["${RW3DM_MODULE_NAME}"]
+)
+
+
+if __name__ == '__main__':
+  setup(**data)

@@ -17,6 +17,9 @@ set(RW3DM_MODULE_NAME "rw3dm" CACHE STRING "Python module name")
 set(RW3DM_INSTALL_DIR ${RW3DM_INSTALL_PREFIX}/${RW3DM_MODULE_NAME} CACHE INTERNAL "Python module installation directory")
 set(CMAKE_INSTALL_PREFIX ${RW3DM_INSTALL_DIR})
 
+# Read module version
+file(STRINGS "VERSION" RW3DM_VERSION_STRING)
+
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 14)
 
@@ -32,14 +35,14 @@ add_subdirectory(3rdparty/)
 #
 
 # Set source files
-set(RW3DM_MODULE_SRC
+set(RW3DM_MODULE_SOURCE
   src/rw3dm.h
   src/rw3dm.cpp
   src/bindings.cpp
 )
 
 # Generate python module with pybind11
-pybind11_add_module(rw3dm MODULE ${RW3DM_MODULE_SRC})
+pybind11_add_module(rw3dm MODULE ${RW3DM_MODULE_SOURCE})
 target_include_directories(rw3dm PRIVATE ${PROJECT_BINARY_DIR})
 target_compile_definitions(rw3dm
   PRIVATE -DOPENNURBS_IMPORTS   # OpenNURBS dynamic linking
@@ -49,21 +52,25 @@ set_target_properties(rw3dm PROPERTIES DEBUG_POSTFIX "_d")
 install(TARGETS rw3dm DESTINATION ${RW3DM_INSTALL_DIR})
 
 #
-# Generate __init__.py file
+# Python module files
 #
 
-# Custom target to generate __init__py.file
-add_custom_target(generate_init_py
-  COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/__init__.py
-)
+# Configure __init__.py file
+configure_file(python/__init__.py.in ${CMAKE_CURRENT_BINARY_DIR}/__init__.py)
 
-# Add generate_init_py target as a dependency to the main python module
-add_dependencies(rw3dm generate_init_py)
-
-# Install __init__.py to the module/app directory
+# Install __init__.py file
 install(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/__init__.py
   DESTINATION ${RW3DM_INSTALL_DIR}
+)
+
+# Configure setup.py file
+configure_file(python/setup.py.in ${CMAKE_CURRENT_BINARY_DIR}/setup.py)
+
+# Install setup.py file
+install(
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/setup.py
+  DESTINATION ${RW3DM_INSTALL_PREFIX}
 )
 
 #
