@@ -44,14 +44,13 @@ bool readONFile(std::string file_name, py::list &data)
                 const ON_Geometry *geometry = geometryComp.Geometry((ON_Geometry *)nullptr);
                 if (geometry != nullptr)
                 {
-                    py::dict contentDict;
                     switch (geometry->ObjectType())
                     {
                     case ON::curve_object:
-                        _readCurve(geometry, contentDict);
+                        _readCurve(geometry, data);
                         break;
                     case ON::surface_object:
-                        _readSurface(geometry, contentDict);
+                        _readSurface(geometry, data);
                         break;
                     case ON::brep_object:
                         _readBrep(geometry, data);
@@ -59,8 +58,6 @@ bool readONFile(std::string file_name, py::list &data)
                     default:
                         break;
                     }
-                    if (contentDict.size() > 0)
-                        data.append(contentDict);
                 }
             }
         }
@@ -82,22 +79,26 @@ bool writeONFile(py::list &data, std::string file_name)
     return false;
 }
 
-void _readCurve(const ON_Geometry* geometry, py::dict &data)
+void _readCurve(const ON_Geometry* geometry, py::list &data)
 {
     // We know that "geometry" is a curve object
     const ON_Curve *curve = (ON_Curve *)geometry;
 
     // Construct the dictionary
-    _constructDict(curve, data);
+    py::dict dataDict;
+    _constructDict(curve, dataDict);
+    data.append(dataDict);
 }
 
-void _readSurface(const ON_Geometry* geometry, py::dict &data)
+void _readSurface(const ON_Geometry* geometry, py::list &data)
 {
     // We know that "geometry" is a surface object
     const ON_Surface *surface = (ON_Surface *)geometry;
 
     // Construct the dictionary
-    _constructDict(surface, data);
+    py::dict dataDict;
+    _constructDict(surface, dataDict);
+    data.append(dataDict);
 }
 
 void _readBrep(const ON_Geometry* geometry, py::list &data)
@@ -124,6 +125,9 @@ void _constructDict(const ON_Curve *curve, py::dict &data)
     ON_NurbsCurve nurbsCurve;
     if (curve->NurbsCurve(&nurbsCurve))
     {
+        // Set shape type
+        data["shape_type"] = "curve";
+
         // Get degree
         data["degree"] = nurbsCurve.Degree();
 
@@ -170,6 +174,9 @@ void _constructDict(const ON_Surface *surf, py::dict &data)
     ON_NurbsSurface nurbsSurface;
     if (surf->NurbsSurface(&nurbsSurface))
     {
+        // Set shape type
+        data["shape_type"] = "surface";
+
         // Get degrees
         data["degree_u"] = nurbsSurface.Degree(0);
         data["degree_v"] = nurbsSurface.Degree(1);

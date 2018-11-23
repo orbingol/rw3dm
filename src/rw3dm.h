@@ -14,8 +14,8 @@ void stopON();
 bool readONFile(std::string, py::list &);
 bool writeONFile(py::list &, std::string);
 
-void _readCurve(const ON_Geometry *, py::dict &);
-void _readSurface(const ON_Geometry *, py::dict &);
+void _readCurve(const ON_Geometry *, py::list &);
+void _readSurface(const ON_Geometry *, py::list &);
 void _readBrep(const ON_Geometry *, py::list &);
 void _constructDict(const ON_Curve *, py::dict &);
 void _constructDict(const ON_Surface *, py::dict &);
