@@ -69,7 +69,16 @@ configure_file(python/setup.py.in ${CMAKE_CURRENT_BINARY_DIR}/setup.py)
 
 # Install setup.py file
 install(
-  FILES ${CMAKE_CURRENT_BINARY_DIR}/setup.py
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/setup.py ${CMAKE_CURRENT_LIST_DIR}/README.md
+  DESTINATION ${RW3DM_INSTALL_PREFIX}
+)
+
+# Configure setup.cfg file
+configure_file(python/setup.cfg.in ${CMAKE_CURRENT_BINARY_DIR}/setup.cfg)
+
+# Install setup.cfg file
+install(
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/setup.cfg ${CMAKE_CURRENT_LIST_DIR}/LICENSE
   DESTINATION ${RW3DM_INSTALL_PREFIX}
 )
 
