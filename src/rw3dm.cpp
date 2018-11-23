@@ -78,7 +78,8 @@ bool readONFile(std::string file_name, py::list &data)
 
 bool writeONFile(py::list &data, std::string file_name)
 {
-    return true;
+    py::print("Write to .3DM has not been implemented yet!");
+    return false;
 }
 
 void _readCurve(const ON_Geometry* geometry, py::dict &data)
