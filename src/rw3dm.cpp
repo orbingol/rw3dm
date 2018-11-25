@@ -319,7 +319,7 @@ bool _constructCurve(ONX_Model &model, py::dict &data)
 
     // Create OpenNURBS curve instance
     ON_NurbsCurve nurbsCurve(dimension,
-        py::cast<bool>(data["rational"]),
+        true,
         py::cast<int>(data["degree"]) + 1,
         (int)points.size()
     );
@@ -396,7 +396,7 @@ bool _constructSurface(ONX_Model &model, py::dict &data)
     // Create OpenNURBS surface instance
     ON_NurbsSurface nurbsSurface(
         dimension,
-        py::cast<bool>(data["rational"]),
+        true,
         py::cast<int>(data["degree_u"]) + 1,
         py::cast<int>(data["degree_v"]) + 1,
         sizeU,
