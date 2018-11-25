@@ -156,12 +156,6 @@ void _constructDict(const ON_Curve *curve, py::dict &data)
         // Set shape type
         data["shape_type"] = "curve";
 
-        // Set dimension
-        data["dimension"] = nurbsCurve.Dimension();
-
-        // Rational or non-rational curve
-        data["rational"] = nurbsCurve.IsRational();
-
         // Get degree
         data["degree"] = nurbsCurve.Degree();
 
@@ -210,12 +204,6 @@ void _constructDict(const ON_Surface *surf, py::dict &data)
     {
         // Set shape type
         data["shape_type"] = "surface";
-
-        // Set dimension
-        data["dimension"] = nurbsSurface.Dimension();
-
-        // Rational or non-rational surface
-        data["rational"] = nurbsSurface.IsRational();
 
         // Get degrees
         data["degree_u"] = nurbsSurface.Degree(0);
@@ -278,8 +266,6 @@ bool _constructCurve(ONX_Model &model, py::dict &data)
 {
     // Check for required variables
     std::vector<std::string> requiredVariables = {
-        "dimension",
-        "rational",
         "degree",
         "knotvector",
         "control_points"
@@ -289,12 +275,6 @@ bool _constructCurve(ONX_Model &model, py::dict &data)
         if (!data.contains(reqVar.c_str()))
             return false;
     }
-
-    // Get dimension
-    int dimension = py::cast<int>(data["dimension"]);
-    // Can only work with 2- and 3-dimensional curves
-    if (dimension > 3 || dimension < 2)
-        return false;
 
     // Get knot vector
     py::list knotVector = py::cast<py::list>(data["knotvector"]);
@@ -317,8 +297,20 @@ bool _constructCurve(ONX_Model &model, py::dict &data)
             weights.append(1.0);
     }
 
+    // Get dimension
+    int dimension;
+    if (data.contains("dimension"))
+         dimension = py::cast<int>(data["dimension"]);
+    else
+        dimension = (int) py::cast<py::list>(points[0]).size();
+
+    // Can only work with 2- and 3-dimensional curves
+    if (dimension > 3 || dimension < 2)
+        return false;
+
     // Create OpenNURBS curve instance
-    ON_NurbsCurve nurbsCurve(dimension,
+    ON_NurbsCurve nurbsCurve(
+        dimension,
         true,
         py::cast<int>(data["degree"]) + 1,
         (int)points.size()
@@ -351,8 +343,6 @@ bool _constructSurface(ONX_Model &model, py::dict &data)
 {
     // Check for required variables
     std::vector<std::string> requiredVariables = {
-        "dimension",
-        "rational",
         "degree_u", "degree_v",
         "knotvector_u", "knotvector_v",
         "size_u", "size_v", "control_points"
@@ -362,12 +352,6 @@ bool _constructSurface(ONX_Model &model, py::dict &data)
         if (!data.contains(reqVar.c_str()))
             return false;
     }
-
-    // Get dimension
-    int dimension = py::cast<int>(data["dimension"]);
-    // Can only work with 3-dimensional surfaces
-    if (dimension != 3)
-        return false;
 
     // Get knot vectors
     py::list knotVectorU = py::cast<py::list>(data["knotvector_u"]);
@@ -392,6 +376,17 @@ bool _constructSurface(ONX_Model &model, py::dict &data)
         for (int i = 0; i < points.size(); i++)
             weights.append(1.0);
     }
+
+    // Get dimension
+    int dimension;
+    if (data.contains("dimension"))
+        dimension = py::cast<int>(data["dimension"]);
+    else
+        dimension = (int) py::cast<py::list>(points[0]).size();
+
+    // Can only work with 3-dimensional surfaces
+    if (dimension != 3)
+        return false;
 
     // Create OpenNURBS surface instance
     ON_NurbsSurface nurbsSurface(
