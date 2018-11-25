@@ -34,4 +34,7 @@ target_include_directories(opennurbs PUBLIC "${CMAKE_CURRENT_LIST_DIR}/opennurbs
 set_property(TARGET opennurbs PROPERTY CXX_STANDARD 14)
 
 # Install OpenNURBS
-install(TARGETS opennurbs DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(
+  TARGETS opennurbs
+  RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}
+)
