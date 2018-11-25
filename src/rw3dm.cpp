@@ -426,8 +426,12 @@ bool _constructSurface(ONX_Model &model, py::dict &data)
         }
     }
 
-    // Add surface to the model
-    model.AddModelGeometryComponent(&nurbsSurface, nullptr);
+    // Each surface (and the trim curves) should belong to a BRep object
+    ON_Brep brep;
+    brep.NewFace(nurbsSurface);
+
+    // Add BRep to the model
+    model.AddModelGeometryComponent(&brep, nullptr);
 
     return true;
 }
