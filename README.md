@@ -5,7 +5,7 @@ RW3DM is a Python module for reading and writing OpenNURBS/Rhino .3DM files in P
 and [pybind11](https://github.com/pybind/pybind11) to generate Python wrappers for the reading
 and writing functions.
 
-## Installation
+## Installing RW3DM
 
 1. Clone the repository: `git clone https://github.com/orbingol/rw3dm.git`
 2. Change to the directory of the local repository: `cd rw3dm`
@@ -14,24 +14,40 @@ and writing functions.
 5. Compile and install (it will also compile OpenNURBS)
 5. Go to install directory and run: `python setup.py install`
 
-## Using
+## Using RW3DM
 
-The following code segment illustrates the usage of the Python module:
+### Reading .3DM files
 
 ```python
 from rw3dm import rw3dm
 
 # Create an empty list for storing the models in the .3DM file
-data = []
+data_out = []
 
-# Read the models inside the .3DM file into the list "data" 
-rw3dm.read("Surface.3dm", data)
+# Read the models contained in the .3DM file into the list "data_out" 
+rw3dm.read("Models_In.3dm", data_out)
 ```
 
-## Function Reference
+### Writing .3DM files
 
-* `rw3dm.read()`: Reads .3DM files
-* `rw3dm.write()`: Writes .3DM files
+```python
+from rw3dm import rw3dm
+
+# Assuming that you have created "data_in" list as explained below
+# Write the surfaces and curves contained in the "data_in" list to the .3DM file 
+rw3dm.write(data_in, "Models_Out.3dm")
+```
+
+### Structure of the "data" list
+
+To be updated...
+
+## Function reference
+
+* `rw3dm.read(filename, data_out)`: Reads .3DM files
+* `rw3dm.write(data_in, filename)`: Writes .3DM files
+
+`filename` is a string, `data_in` and `data_out` are lists.
 
 ## Author
 
