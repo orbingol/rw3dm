@@ -47,7 +47,7 @@ rw3dm.write(data_in, "Models_Out.3dm")
 - knotvector: (list)    # knot vector
 - control_points:
   - points: (list)      # Cartesian coordinates of the control points
-  - weights: (list)     # weights vector
+  - weights: (list)     # weights vector (optional)
 ```
 
 ### Data structure for surface
@@ -55,15 +55,15 @@ rw3dm.write(data_in, "Models_Out.3dm")
 ```yaml
 - shape_type: "surface"   # should be the string "surface"
 - dimension: 3            # dimension of the surface (optional) 
-- degree_u: (int)
-- degree_v: (int)
-- knotvector_u: (list)
-- knotvector_v: (list)
+- degree_u: (int)         # degree (u-direction)
+- degree_v: (int)         # degree (v-direction)
+- knotvector_u: (list)    # knot vector (u-direction)
+- knotvector_v: (list)    # knot vector (v-direction)
 - size_u: (int)           # number of control points on the u-direction
 - size_v: (int)           # number of control points on the v-direction
 - control_points:
   - points: (list)        # Cartesian coordinates of the control points
-  - weights: (list)       # weights vector
+  - weights: (list)       # weights vector (optional)
 ```
 
 ## Function reference
