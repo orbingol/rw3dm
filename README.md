@@ -38,9 +38,33 @@ from rw3dm import rw3dm
 rw3dm.write(data_in, "Models_Out.3dm")
 ```
 
-### Structure of the "data" list
+### Data structure for curve
 
-To be updated...
+```yaml
+- shape_type: "curve"   # should be the string "curve"
+- dimension: (int)      # dimension of the curve; e.g. 2D or 3D (optional)
+- degree: (int)         # degree of the curve
+- knotvector: (list)    # knot vector
+- control_points:
+  - points: (list)      # Cartesian coordinates of the control points
+  - weights: (list)     # weights vector
+```
+
+### Data structure for surface
+
+```yaml
+- shape_type: "surface"   # should be the string "surface"
+- dimension: 3            # dimension of the surface (optional) 
+- degree_u: (int)
+- degree_v: (int)
+- knotvector_u: (list)
+- knotvector_v: (list)
+- size_u: (int)           # number of control points on the u-direction
+- size_v: (int)           # number of control points on the v-direction
+- control_points:
+  - points: (list)        # Cartesian coordinates of the control points
+  - weights: (list)       # weights vector
+```
 
 ## Function reference
 
