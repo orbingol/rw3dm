@@ -7,6 +7,11 @@ if(MSVC)
   endif()
 endif()
 
+set(ON_COMPILE_FLAGS "")
+if(NOT MSVC)
+  set(ON_COMPILE_FLAGS ${ON_COMPILE_FLAGS} "-Wall -Wno-overloaded-virtual -Wno-switch -Wno-unknown-pragmas -Wno-unused-private-field")
+endif()
+
 # Include OpenNURBS zlib source
 file(GLOB ON_ZLIB_SRC "${CMAKE_CURRENT_LIST_DIR}/opennurbs/zlib/*.h" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/zlib/*.c")
 
@@ -32,7 +37,11 @@ target_compile_definitions(opennurbs
   PRIVATE -DOPENNURBS_ZLIB_LIB_DIR="${CMAKE_CURRENT_BINARY_DIR}/$<CONFIGURATION>"
   PRIVATE -DUNICODE
 )
-set_target_properties(opennurbs PROPERTIES DEBUG_POSTFIX "_d")
+set_target_properties(opennurbs
+  PROPERTIES
+    DEBUG_POSTFIX "_d"
+    LINK_FLAGS ${ON_COMPILE_FLAGS}
+)
 target_link_libraries(opennurbs PRIVATE shlwapi zlib)
 target_include_directories(opennurbs PUBLIC "${CMAKE_CURRENT_LIST_DIR}/opennurbs")
 set_property(TARGET opennurbs PROPERTY CXX_STANDARD 14)
