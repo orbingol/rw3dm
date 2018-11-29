@@ -7,7 +7,7 @@ if(MSVC)
   endif()
 endif()
 
-# Include OpenNURBS ZLib source
+# Include OpenNURBS zlib source
 file(GLOB ON_ZLIB_SRC "${CMAKE_CURRENT_LIST_DIR}/opennurbs/zlib/*.h" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/zlib/*.c")
 
 # Include OpenNURBS source
@@ -15,8 +15,12 @@ file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_gl.cpp" "opennurbs/op
 file(GLOB ON_SRC "${CMAKE_CURRENT_LIST_DIR}/opennurbs/*.h" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/*.cpp")
 file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_gl.skip" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_gl.cpp")
 
-# Generate ZLib as a static library
+# Generate zlib as a static library
 add_library(zlib STATIC ${ON_ZLIB_SRC})
+target_compile_definitions(zlib
+  PRIVATE -DMY_ZCALLOC
+  PRIVATE -DZ_PREFIX
+)
 
 # Generate OpenNURBS as a dynamic library
 add_library(opennurbs SHARED ${ON_SRC})
