@@ -324,11 +324,12 @@ bool _constructCurve(ONX_Model &model, py::dict &data)
     for (int idx = 0; idx < nurbsCurve.CVCount(); idx++)
     {
         py::list cptDict = py::cast<py::list>(points[idx]);
+        double w = py::cast<double>(weights[idx]);
         ON_4dPoint cpt(
-            py::cast<double>(cptDict[0]),
-            py::cast<double>(cptDict[1]),
-            (dimension == 2) ? 0.0 : py::cast<double>(cptDict[2]),
-            py::cast<double>(weights[idx])
+            py::cast<double>(cptDict[0]) * w,
+            py::cast<double>(cptDict[1]) * w,
+            (dimension == 2) ? 0.0 : py::cast<double>(cptDict[2]) * w,
+            w
         );
         nurbsCurve.SetCV(idx, cpt);
     }
@@ -411,11 +412,12 @@ bool _constructSurface(ONX_Model &model, py::dict &data)
         {
             int idx = idxV + (sizeV * idxU);
             py::list cptDict = py::cast<py::list>(points[idx]);
+            double w = py::cast<double>(weights[idx]);
             ON_4dPoint cpt(
-                py::cast<double>(cptDict[0]),
-                py::cast<double>(cptDict[1]),
-                py::cast<double>(cptDict[2]),
-                py::cast<double>(weights[idx])
+                py::cast<double>(cptDict[0]) * w,
+                py::cast<double>(cptDict[1]) * w,
+                py::cast<double>(cptDict[2]) * w,
+                w
             );
             nurbsSurface.SetCV(idxU, idxV, cpt);
         }
