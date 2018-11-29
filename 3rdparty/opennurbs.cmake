@@ -10,6 +10,9 @@ endif()
 # Include OpenNURBS zlib source
 file(GLOB ON_ZLIB_SRC "${CMAKE_CURRENT_LIST_DIR}/opennurbs/zlib/*.h" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/zlib/*.c")
 
+# Include OpenNURBS freetype source
+file(GLOB_RECURSE ON_FREETYPE_SRC "${CMAKE_CURRENT_LIST_DIR}/opennurbs/freetype263/src/*.h" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/freetype263/src/*.c")
+
 # Include OpenNURBS source
 file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_gl.cpp" "opennurbs/opennurbs_gl.skip")
 file(GLOB ON_SRC "${CMAKE_CURRENT_LIST_DIR}/opennurbs/*.h" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/*.cpp")
@@ -22,6 +25,9 @@ target_compile_definitions(zlib
   PRIVATE -DZ_PREFIX
 )
 
+# Generate freetype as a static library
+add_library(freetype STATIC ${ON_FREETYPE_SRC})
+
 # Generate OpenNURBS as a dynamic library
 add_library(opennurbs SHARED ${ON_SRC})
 target_compile_definitions(opennurbs
@@ -33,7 +39,7 @@ target_compile_definitions(opennurbs
   PRIVATE -DUNICODE
 )
 set_target_properties(opennurbs PROPERTIES DEBUG_POSTFIX "_d")
-target_link_libraries(opennurbs PRIVATE shlwapi zlib)
+target_link_libraries(opennurbs PRIVATE shlwapi zlib freetype)
 target_include_directories(opennurbs PUBLIC "${CMAKE_CURRENT_LIST_DIR}/opennurbs")
 set_property(TARGET opennurbs PROPERTY CXX_STANDARD 14)
 
