@@ -75,7 +75,8 @@ rw3dm.write(data_in, "Models_Out.3dm")
 * `rw3dm.read(filename, data_out)`: Reads .3DM files
 * `rw3dm.write(data_in, filename)`: Writes .3DM files
 
-`filename` is a string, `data_in` and `data_out` are lists.
+`filename` is a string, `data_in` and `data_out` are lists of dictionaries containing the NURBS curve and surface data.
+Please refer to the Data Structures section above for details on the structure of the surface and curve dictionaries.
 
 ## Author
 
