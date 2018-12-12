@@ -1,6 +1,6 @@
-# RW3DM - Rhino 3DM file reader/writer in Python
+# RW3DM - Extract NURBS curves and surfaces from Rhino .3DM files
 
-RW3DM is a Python module for reading and writing OpenNURBS/Rhino .3DM files in Python. It uses
+RW3DM is a Python module for extracting NURBS curves and surfaces from OpenNURBS/Rhino .3DM files. It uses
 [OpenNURBS](https://github.com/mcneel/opennurbs) library for reading and writing .3DM files
 and [pybind11](https://github.com/pybind/pybind11) to generate Python wrappers for the reading
 and writing functions.
@@ -18,6 +18,8 @@ and writing functions.
 
 ### Reading .3DM files
 
+The following code snippet reads a .3DM file and extracts shape information contained in the file.
+
 ```python
 from rw3dm import rw3dm
 
@@ -29,6 +31,8 @@ rw3dm.read("Models_In.3dm", data_out)
 ```
 
 ### Writing .3DM files
+
+The following code snippet writes NURBS shape information to a .3DM file.
 
 ```python
 from rw3dm import rw3dm
