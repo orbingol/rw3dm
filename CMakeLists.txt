@@ -28,7 +28,7 @@ find_package(PythonLibs REQUIRED)
 include_directories(${PYTHON_INCLUDE_DIRS})
 
 # Add 3rd party libraries
-add_subdirectory(3rdparty/)
+add_subdirectory(3rdparty)
 
 #
 # OpenNURBS/Rhino .3DM file reading and writing library
