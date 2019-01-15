@@ -1,0 +1,2 @@
+recursive-include ${RW3DM_MODULE_NAME} *.pyd
+recursive-include ${RW3DM_MODULE_NAME} *.dll

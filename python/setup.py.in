@@ -19,6 +19,7 @@ data = dict(
   url="https://github.com/orbingol/rw3dm",
   author="Onur Rauf Bingol",
   author_email="nurbs-python@googlegroups.com",
+  include_package_data=True,
   packages=["${RW3DM_MODULE_NAME}"]
 )
 

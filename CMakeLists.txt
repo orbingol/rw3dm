@@ -58,27 +58,29 @@ install(TARGETS rw3dm DESTINATION ${RW3DM_INSTALL_DIR})
 # Configure __init__.py file
 configure_file(python/__init__.py.in ${CMAKE_CURRENT_BINARY_DIR}/__init__.py)
 
+# Configure setup.py file
+configure_file(python/setup.py.in ${CMAKE_CURRENT_BINARY_DIR}/setup.py)
+
+# Configure setup.cfg file
+configure_file(python/setup.cfg.in ${CMAKE_CURRENT_BINARY_DIR}/setup.cfg)
+
+# Configure MAINFEST.in file
+configure_file(python/MANIFEST.in.in ${CMAKE_CURRENT_BINARY_DIR}/MANIFEST.in)
+
 # Install __init__.py file
 install(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/__init__.py
   DESTINATION ${RW3DM_INSTALL_DIR}
 )
 
-# Configure setup.py file
-configure_file(python/setup.py.in ${CMAKE_CURRENT_BINARY_DIR}/setup.py)
-
-# Install setup.py file
-install(
-  FILES ${CMAKE_CURRENT_BINARY_DIR}/setup.py ${CMAKE_CURRENT_LIST_DIR}/README.md
-  DESTINATION ${RW3DM_INSTALL_PREFIX}
-)
-
-# Configure setup.cfg file
-configure_file(python/setup.cfg.in ${CMAKE_CURRENT_BINARY_DIR}/setup.cfg)
-
 # Install setup.cfg file
 install(
-  FILES ${CMAKE_CURRENT_BINARY_DIR}/setup.cfg ${CMAKE_CURRENT_LIST_DIR}/LICENSE
+  FILES 
+    ${CMAKE_CURRENT_BINARY_DIR}/setup.py
+    ${CMAKE_CURRENT_BINARY_DIR}/setup.cfg
+    ${CMAKE_CURRENT_BINARY_DIR}/MANIFEST.in
+    ${CMAKE_CURRENT_LIST_DIR}/README.md
+    ${CMAKE_CURRENT_LIST_DIR}/LICENSE
   DESTINATION ${RW3DM_INSTALL_PREFIX}
 )
 
