@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, Extension
 from os import path
 from io import open
 
@@ -20,7 +20,8 @@ data = dict(
   author="Onur Rauf Bingol",
   author_email="nurbs-python@googlegroups.com",
   include_package_data=True,
-  packages=["${RW3DM_MODULE_NAME}"]
+  packages=["${RW3DM_MODULE_NAME}"],
+  ext_modules=[Extension(name="${RW3DM_MODULE_NAME}.rw3dm", sources=[])]
 )
 
 
