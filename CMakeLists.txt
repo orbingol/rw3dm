@@ -10,7 +10,7 @@ endif()
 # Set install prefix
 set(RW3DM_INSTALL_PREFIX ${PROJECT_BINARY_DIR}/install CACHE PATH "Install prefix")
 
-# Set python module name
+# Set python module name: "from ${RW3DM_MODULE_NAME} import rw3dm"
 set(RW3DM_MODULE_NAME "rw3dm" CACHE STRING "Python module name")
 
 # Set python module install directory
@@ -31,7 +31,7 @@ include_directories(${PYTHON_INCLUDE_DIRS})
 add_subdirectory(3rdparty)
 
 #
-# OpenNURBS/Rhino .3DM file reading and writing library
+# Build OpenNURBS wrapper library
 #
 
 # Set source files
@@ -52,7 +52,7 @@ set_target_properties(rw3dm PROPERTIES DEBUG_POSTFIX "_d")
 install(TARGETS rw3dm DESTINATION ${RW3DM_INSTALL_DIR})
 
 #
-# Python module files
+# Generate Python files
 #
 
 # Configure __init__.py file
@@ -73,7 +73,7 @@ install(
   DESTINATION ${RW3DM_INSTALL_DIR}
 )
 
-# Install setup.cfg file
+# Install setuptools-related files
 install(
   FILES 
     ${CMAKE_CURRENT_BINARY_DIR}/setup.py
@@ -85,7 +85,7 @@ install(
 )
 
 #
-# Uninstall target
+# Create uninstall target
 # Ref: https://gitlab.kitware.com/cmake/community/wikis/FAQ#can-i-do-make-uninstall-with-cmake
 #
 
