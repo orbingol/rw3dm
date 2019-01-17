@@ -17,8 +17,8 @@ and writing functions.
 
 ### Notes on installation
 
-* You might require at least Visual Studio 2017 to build OpenNURBS and pybind11 modules
-* Please don't forget to install C++ support on Visual Studio 2017
+* Visual Studio 2017 is required to build OpenNURBS and pybind11 modules
+* Please don't forget to install C++ support on Visual Studio
 * It is also possible to use MSBuild as CMake detects it as Visual Studio
 * In CMake, Visual Studio 32-bit and 64-bit are different and it should be selected with respect to the Python architecture that you are using. You can find your Python architecture by typing:
 
