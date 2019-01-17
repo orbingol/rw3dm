@@ -10,9 +10,19 @@ and writing functions.
 1. Clone the repository: `git clone https://github.com/orbingol/rw3dm.git`
 2. Change to the directory of the local repository: `cd rw3dm`
 3. Update submodules: `git submodule update --init`
-4. Run CMake to generate build configuration files
-5. Compile and install (it will also compile OpenNURBS)
-5. Go to install directory and run: `python setup.py install`
+4. Create a build directory for CMake-generated files, e.g. `mkdir build`
+5. Run CMake to generate build configuration files
+6. Compile and install (it will also compile OpenNURBS)
+7. Go to the install directory and run: `python setup.py install`
+
+### Notes on installation
+
+* You might require at least Visual Studio 2017 to build OpenNURBS and pybind11 modules
+* Please don't forget to install C++ support on Visual Studio 2017
+* It is also possible to use MSBuild as CMake detects it as Visual Studio
+* In CMake, Visual Studio 32-bit and 64-bit are different and it should be selected with respect to the Python architecture that you are using. You can find your Python architecture by typing `python -c "import platform; print(platform.architecture()[0])"`
+* Please choose **Release** as the build configuration inside Visual Studio before you compile the module if you don't have any intention to debug the module
+* In case of any import errors, check build configuration and compiler architecture again to make sure that they are correctly selected
 
 ## Using RW3DM
 
