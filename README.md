@@ -25,6 +25,11 @@ and writing functions.
 
 ### Notes on installing and updating
 
+#### General information
+
+* The minimum CMake version required is 3.8. Please visit [cmake.org](https://cmake.org/) to download the binary for your operating system.
+* Please make sure that you are compiling against the correct Python library versions (mixing versions can cause some issues)
+
 #### For Windows
 
 * Visual Studio 2017 is required to compile OpenNURBS and pybind11 modules
@@ -37,10 +42,11 @@ and writing functions.
 * Please choose **Release** as the build configuration inside Visual Studio before you compile the module
 * In case of any import errors, check build configuration and compiler architecture again to make sure that they were correctly selected
 
-#### For Linux
+#### For Ubuntu 18.04
 
 * The package compilation is tested on Ubuntu 18.04 with gcc 7.3
-* For Ubuntu, please don't forget to install the compiler packages: `apt install build-essential`
+* Please don't forget to install the compiler packages: `apt install build-essential`
+* You might also need to install the Python development libraries
 
 ## Using RW3DM
 
