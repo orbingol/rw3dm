@@ -21,7 +21,10 @@ set(CMAKE_INSTALL_PREFIX ${RW3DM_INSTALL_DIR})
 file(STRINGS "VERSION" RW3DM_VERSION_STRING)
 
 # Set C++ standard
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
+
+# Set -fPIC option
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Add python libraries
 find_package(PythonLibs REQUIRED)
@@ -44,9 +47,11 @@ set(RW3DM_MODULE_SOURCE
 # Generate python module with pybind11
 pybind11_add_module(rw3dm MODULE ${RW3DM_MODULE_SOURCE})
 target_include_directories(rw3dm PRIVATE ${PROJECT_BINARY_DIR})
-target_compile_definitions(rw3dm
-  PRIVATE -DOPENNURBS_IMPORTS   # OpenNURBS dynamic linking
-)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  target_compile_definitions(rw3dm
+    PRIVATE -DON_CLANG_CONSTRUCTOR_BUG
+  )
+endif()
 target_link_libraries(rw3dm PRIVATE opennurbs)
 set_target_properties(rw3dm PROPERTIES DEBUG_POSTFIX "_d")
 install(TARGETS rw3dm DESTINATION ${RW3DM_INSTALL_DIR})
