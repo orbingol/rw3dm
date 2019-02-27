@@ -5,7 +5,9 @@ RW3DM is a Python module for extracting NURBS curves and surfaces from OpenNURBS
 and [pybind11](https://github.com/pybind/pybind11) to generate Python wrappers for the reading
 and writing functions.
 
-## Installing RW3DM
+## Installing & updating RW3DM
+
+### Installing RW3DM
 
 1. Clone the repository: `git clone https://github.com/orbingol/rw3dm.git`
 2. Change to the directory of the local repository: `cd rw3dm`
@@ -15,9 +17,17 @@ and writing functions.
 6. Compile and install (it will also compile OpenNURBS)
 7. Go to the install directory and run: `python setup.py install`
 
-### Notes on installation
+### Updating RW3DM
 
-* Visual Studio 2017 is required to build OpenNURBS and pybind11 modules
+1. Pull the latest commits: `git pull --rebase`
+2. Update submodules: `git submodule update`
+3. Compile and install
+
+### Notes on installing and updating
+
+#### For Windows
+
+* Visual Studio 2017 is required to compile OpenNURBS and pybind11 modules
 * Please don't forget to install C++ support on Visual Studio
 * It is also possible to use MSBuild (CMake detects it as Visual Studio)
 * Visual Studio 32-bit and 64-bit are processed differently in CMake and it should be selected with respect to the Python architecture that you are using. You can find your Python architecture by typing:
@@ -26,6 +36,11 @@ and writing functions.
 
 * Please choose **Release** as the build configuration inside Visual Studio before you compile the module
 * In case of any import errors, check build configuration and compiler architecture again to make sure that they were correctly selected
+
+#### For Linux
+
+* The package compilation is tested on Ubuntu 18.04 with gcc 7.3
+* For Ubuntu, please don't forget to install the compiler packages: `apt install build-essential`
 
 ## Using RW3DM
 
