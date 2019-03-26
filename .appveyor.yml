@@ -55,17 +55,17 @@ environment:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       PYTHON: "C:\\Python35-x64"
       PYTHON_ARCH: "64"
-      PYTHON_LIB: "C:\\Python35\\libs\\python35.lib"
+      PYTHON_LIB: "C:\\Python35-x64\\libs\\python35.lib"
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       PYTHON: "C:\\Python36-x64"
       PYTHON_ARCH: "64"
-      PYTHON_LIB: "C:\\Python36\\libs\\python36.lib"
+      PYTHON_LIB: "C:\\Python36-x64\\libs\\python36.lib"
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       PYTHON: "C:\\Python37-x64"
       PYTHON_ARCH: "64"
-      PYTHON_LIB: "C:\\Python37\\libs\\python37.lib"
+      PYTHON_LIB: "C:\\Python37-x64\\libs\\python37.lib"
 
 # Install required packages before the build
 install:
