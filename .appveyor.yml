@@ -12,10 +12,10 @@ version: Build {build}
 # Initialize CI
 init:
   - set arch=
-  - if "%PYTHON_ARCH%"=="64" ( set arch=Win64 )
+  - if "%PYTHON_ARCH%"=="64" ( set arch= Win64 )
   - echo %arch%
   - echo %APPVEYOR_BUILD_WORKER_IMAGE%
-  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" ( set generator="Visual Studio 15 2017 %arch%" )
+  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" ( set generator="Visual Studio 15 2017%arch%" )
   - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
 
 # Clone with submodules
