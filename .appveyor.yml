@@ -1,0 +1,120 @@
+# https://ci.appveyor.com/project/orbingol/rw3dm
+
+# Partly inspired from
+#   http://tjelvarolsson.com/blog/how-to-continuously-test-your-python-code-on-windows-using-appveyor/
+#   https://packaging.python.org/guides/supporting-windows-using-appveyor
+#   https://github.com/ogrisel/python-appveyor-demo
+#   https://www.appveyor.com/docs/appveyor-yml/
+
+# Build version
+version: Build {build}
+
+# Initialize CI
+init:
+  - set arch=
+  - if "%PYTHON_ARCH%"=="64" ( set arch=Win64 )
+  - echo %arch%
+  - echo %APPVEYOR_BUILD_WORKER_IMAGE%
+  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" ( set generator="Visual Studio 15 2017%arch%" )
+  - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
+
+# Clone with submodules
+clone_script:
+- cmd: git clone -q --recursive --branch=%APPVEYOR_REPO_BRANCH% https://github.com/%APPVEYOR_REPO_NAME%.git %APPVEYOR_BUILD_FOLDER%
+- cmd: git checkout -qf %APPVEYOR_REPO_COMMIT%
+
+# Branch configuration
+branches:
+  only:
+    - master
+    - appveyor-testing
+
+# PR settings
+pull_requests:
+  do_not_increment_build_number: true
+
+# Set build environment
+environment:
+  matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "C:\\Python35"
+      PYTHON_ARCH: "32"
+      PYTHON_LIB: "C:\\Python35\\libs\\python35.lib"
+
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "C:\\Python36"
+      PYTHON_ARCH: "32"
+      PYTHON_LIB: "C:\\Python36\\libs\\python36.lib"
+
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "C:\\Python37"
+      PYTHON_ARCH: "32"
+      PYTHON_LIB: "C:\\Python37\\libs\\python37.lib"
+
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "C:\\Python35-x64"
+      PYTHON_ARCH: "64"
+      PYTHON_LIB: "C:\\Python35\\libs\\python35.lib"
+
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "C:\\Python36-x64"
+      PYTHON_ARCH: "64"
+      PYTHON_LIB: "C:\\Python36\\libs\\python36.lib"
+
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "C:\\Python37-x64"
+      PYTHON_ARCH: "64"
+      PYTHON_LIB: "C:\\Python37\\libs\\python37.lib"
+
+# Install required packages before the build
+install:
+  # If there is a newer build queued for the same PR, cancel this one.
+  # The AppVeyor 'rollout builds' option is supposed to serve the same
+  # purpose but it is problematic because it tends to cancel builds pushed
+  # directly to master instead of just PR builds (or the converse).
+  # credits: JuliaLang developers.
+  - ps: if ($env:APPVEYOR_PULL_REQUEST_NUMBER -and $env:APPVEYOR_BUILD_NUMBER -ne ((Invoke-RestMethod `
+        https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG/history?recordsNumber=50).builds | `
+        Where-Object pullRequestId -eq $env:APPVEYOR_PULL_REQUEST_NUMBER)[0].buildNumber) { `
+          throw "There are newer queued builds for this pull request, failing early." }
+
+  # Print Python version
+  - cmd: python -c "import sys; print(sys.version)"
+
+  # Upgrade to the latest version of pip to avoid it displaying warnings about it being out of date.
+  - cmd: python -m pip install --disable-pip-version-check --upgrade pip
+
+  # Upgrade setuptools and wheel
+  - cmd: python -m pip install --upgrade setuptools wheel
+
+# Generate Visual Studio solution files
+before_build:
+  - cmd: mkdir build
+  - cmd: cd build
+  - cmd: cmake --version
+  - cmd: cmake .. -G %generator% -DPYTHON_INCLUDE_DIR=%PYTHON%\\include -DPYTHON_LIBRARY=%PYTHON_LIB%
+
+# Compile the package
+build_script:
+  - cmd: cmake --build . --config Release --target rw3dm
+
+# Install the package
+after_build:
+  - cmd: cmake --build . --config Release --target install
+  - cmd: cd install
+
+# Install the package to the site-packages directory
+before_test:
+  - cmd: python -m pip install .
+
+# Test Python import
+test_script:
+  - cmd: python -c "from rw3dm import *; print(rw3dm.__version__)"
+
+# Build the wheel after test
+after_test:
+  - cmd: python setup.py bdist_wheel
+
+# Push binary wheels as artifacts
+artifacts:
+  - path: build\install\dist\*
