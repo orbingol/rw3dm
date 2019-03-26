@@ -16,15 +16,15 @@ and writing functions.
 5. Enter the build directory, e.g. `cd build`
 6. Run CMake to generate build configuration files, e.g. `cmake ..` or use CMake GUI
 7. Compile and install
-  * For Windows, you will find the Visual Studio project files under `build` directory.
-  * After opening Visual Studio, choose `Release` from the build combobox, then right click on `INSTALL` and choose `Rebuild`
-  * For Linux, run `make install` inside the `build` directory
-  * The install directory will be `build/install` by default.
-  * You can modify the install directory using `RW3DM_INSTALL_PREFIX` variable while configuring the project with CMake
+ * For Windows, you will find the Visual Studio project files under `build` directory.
+ * After opening Visual Studio, choose `Release` from the build combobox, then right click on `INSTALL` and choose `Rebuild`
+ * For Linux, run `make install` inside the `build` directory
+ * The install directory will be `build/install` by default.
+ * You can modify the install directory using `RW3DM_INSTALL_PREFIX` variable while configuring the project with CMake
 8. Go to the install directory, e.g. `cd install` or the one you configured with CMake during step 6.
 9. Run: `python setup.py install`
-  * Please note that on Linux systems, there will be `python2` and `python3`. `python` might be linked to one of these.
-  * Please use the Python version that you linked the module. Otherwise, you will encounter import errors.
+ * Please note that on Linux systems, there will be `python2` and `python3`. `python` might be linked to one of these.
+ * Please use the Python version that you linked the module. Otherwise, you will encounter import errors.
 
 ### Updating RW3DM
 
