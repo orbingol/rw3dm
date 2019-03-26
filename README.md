@@ -13,15 +13,24 @@ and writing functions.
 2. Change to the directory of the local repository: `cd rw3dm`
 3. Update submodules: `git submodule update --init`
 4. Create a build directory for CMake-generated files, e.g. `mkdir build`
-5. Run CMake to generate build configuration files
-6. Compile and install (it will also compile OpenNURBS)
-7. Go to the install directory and run: `python setup.py install`
+5. Enter the build directory, e.g. `cd build`
+6. Run CMake to generate build configuration files, e.g. `cmake ..` or use CMake GUI
+7. Compile and install
+  * For Windows, you will find the Visual Studio project files under `build` directory.
+  * After opening Visual Studio, choose `Release` from the build combobox, then right click on `INSTALL` and choose `Rebuild`
+  * For Linux, run `make install` inside the `build` directory
+  * The install directory will be `build/install` by default.
+  * You can modify the install directory using `RW3DM_INSTALL_PREFIX` variable while configuring the project with CMake
+8. Go to the install directory, e.g. `cd install` or the one you configured with CMake during step 6.
+9. Run: `python setup.py install`
+  * Please note that on Linux systems, there will be `python2` and `python3`. `python` might be linked to one of these.
+  * Please use the Python version that you linked the module. Otherwise, you will encounter import errors.
 
 ### Updating RW3DM
 
 1. Pull the latest commits: `git pull --rebase`
 2. Update submodules: `git submodule update`
-3. Compile and install
+3. Repeat steps from 5 to 9
 
 ### Notes on installing and updating
 
