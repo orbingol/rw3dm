@@ -109,7 +109,7 @@ before_test:
 
 # Test Python import
 test_script:
-  - cmd: python -c "from rw3dm import *; print(rw3dm.__version__)"
+  - cmd: python -c "import rw3dm; print(rw3dm.__version__)"
 
 # Build the wheel after test
 after_test:
