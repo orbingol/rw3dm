@@ -6,3 +6,6 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Add OpenNURBS
 include(opennurbs.cmake)
+
+# Add jsoncpp
+include(jsoncpp.cmake)

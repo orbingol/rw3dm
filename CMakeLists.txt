@@ -33,7 +33,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     PRIVATE -DON_CLANG_CONSTRUCTOR_BUG
   )
 endif()
-target_link_libraries(rw3dm PRIVATE opennurbs)
+target_link_libraries(rw3dm PRIVATE jsoncpp opennurbs)
 set_target_properties(rw3dm PROPERTIES DEBUG_POSTFIX "_d")
 
 # Install the binary
