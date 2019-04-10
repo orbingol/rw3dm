@@ -1,6 +1,0 @@
-""" Extract NURBS curve and surface data from Rhino/OpenNURBS .3dm files """
-
-__version__ = "${RW3DM_VERSION_STRING}"
-__license__ = "MIT"
-
-__all__ = ["rw3dm"]

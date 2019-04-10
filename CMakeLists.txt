@@ -21,7 +21,6 @@ add_subdirectory(3rdparty)
 set(SOURCE_FILES_RW3DM
   src/rw3dm.h
   src/rw3dm.cpp
-  src/bindings.cpp
   src/main.cpp
   src/common.h
   src/common.cpp
