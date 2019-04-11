@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8.2)
-project(RW3DM)
+project(rw3dm)
 
 # Generate a Visual Studio filter "CMakePredefinedTargets"
 if(MSVC)
@@ -7,9 +7,13 @@ if(MSVC)
   set(PREDEFINED_TARGETS_FOLDER "CustomTargets")
 endif()
 
-# Set install prefix
-set(RW3DM_INSTALL_DIR ${PROJECT_BINARY_DIR}/install CACHE PATH "Install prefix")
+# Set install directory
+set(RW3DM_INSTALL_DIR ${PROJECT_BINARY_DIR}/install CACHE PATH "Install directory")
 set(CMAKE_INSTALL_PREFIX ${RW3DM_INSTALL_DIR})
+
+# Options
+set(RW3DM_BUILD_ON2JSON ON CACHE BOOL "Compile and install OpenNURBS to JSON converter")
+set(RW3DM_BUILD_JSON2ON ON CACHE BOOL "Compile and install JSON to OpenNURBS converter")
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -17,30 +21,59 @@ set(CMAKE_CXX_STANDARD 17)
 # Add 3rd party libraries
 add_subdirectory(3rdparty)
 
-# Set source files
-set(SOURCE_FILES_RW3DM
-  src/rw3dm.h
-  src/rw3dm.cpp
-  src/main.cpp
-  src/common.h
-  src/common.cpp
-)
+if(RW3DM_BUILD_ON2JSON)
+  # Set source files for ON2JSON
+  set(SOURCE_FILES_ON2JSON
+    src/rw3dm.h
+    src/rw3dm.cpp
+    src/common.h
+    src/common.cpp
+    src/on2json.cpp
+  )
 
-# Generate executable
-add_executable(rw3dm ${SOURCE_FILES_RW3DM})
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  target_compile_definitions(rw3dm
-    PRIVATE -DON_CLANG_CONSTRUCTOR_BUG
+  # Generate ON2JSON executable
+  add_executable(on2json ${SOURCE_FILES_ON2JSON})
+  if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_compile_definitions(on2json
+      PRIVATE -DON_CLANG_CONSTRUCTOR_BUG
+    )
+  endif()
+  target_link_libraries(on2json PRIVATE jsoncpp opennurbs)
+  set_target_properties(on2json PROPERTIES DEBUG_POSTFIX "_d")
+
+  # Install the ON2JSON binary
+  install(
+    TARGETS on2json
+    DESTINATION ${RW3DM_INSTALL_DIR}
   )
 endif()
-target_link_libraries(rw3dm PRIVATE jsoncpp opennurbs)
-set_target_properties(rw3dm PROPERTIES DEBUG_POSTFIX "_d")
 
-# Install the binary
-install(
-  TARGETS rw3dm 
-  DESTINATION ${RW3DM_INSTALL_DIR}
-)
+if(RW3DM_BUILD_JSON2ON)
+  # Set source files for JSON2ON
+  set(SOURCE_FILES_JSON2ON
+    src/rw3dm.h
+    src/rw3dm.cpp
+    src/common.h
+    src/common.cpp
+    src/json2on.cpp
+  )
+
+  # Generate executable for JSON2ON
+  add_executable(json2on ${SOURCE_FILES_JSON2ON})
+  if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_compile_definitions(json2on
+      PRIVATE -DON_CLANG_CONSTRUCTOR_BUG
+    )
+  endif()
+  target_link_libraries(json2on PRIVATE jsoncpp opennurbs)
+  set_target_properties(json2on PROPERTIES DEBUG_POSTFIX "_d")
+
+  # Install the JSON2ON binary
+  install(
+    TARGETS json2on
+    DESTINATION ${RW3DM_INSTALL_DIR}
+  )
+endif()
 
 # Create uninstall target
 if(NOT TARGET uninstall)
