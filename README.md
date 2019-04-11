@@ -1,4 +1,4 @@
-# Extract NURBS curves and surfaces from .3DM files
+# RW3DM - OpenNURBS/Rhino Extensions for NURBS-Python (geomdl)
 
 RW3DM is a Python module for extracting NURBS curves and surfaces from OpenNURBS/Rhino .3DM files. It uses
 [OpenNURBS](https://github.com/mcneel/opennurbs) library for reading and writing .3DM files
@@ -61,65 +61,11 @@ and writing functions.
 
 ### Reading .3DM files
 
-The following code snippet reads a .3DM file and extracts shape information contained in the file.
 
-```python
-from rw3dm import rw3dm
-
-# Create an empty list for storing the models in the .3DM file
-data_out = []
-
-# Read the models contained in the .3DM file into the list "data_out" 
-rw3dm.read("Models_In.3dm", data_out)
-```
 
 ### Writing .3DM files
 
-The following code snippet writes NURBS shape information to a .3DM file.
 
-```python
-from rw3dm import rw3dm
-
-# Assuming that you have created "data_in" list as explained below
-# Write the surfaces and curves contained in the "data_in" list to the .3DM file 
-rw3dm.write(data_in, "Models_Out.3dm")
-```
-
-### Data structure for curve
-
-```yaml
-- shape_type: "curve"   # should be the string "curve"
-- dimension: (int)      # dimension of the curve; e.g. 2D or 3D (optional)
-- degree: (int)         # degree of the curve
-- knotvector: (list)    # knot vector
-- control_points:
-  - points: (list)      # Cartesian coordinates of the control points
-  - weights: (list)     # weights vector (optional)
-```
-
-### Data structure for surface
-
-```yaml
-- shape_type: "surface"   # should be the string "surface"
-- dimension: 3            # dimension of the surface (optional) 
-- degree_u: (int)         # degree (u-direction)
-- degree_v: (int)         # degree (v-direction)
-- knotvector_u: (list)    # knot vector (u-direction)
-- knotvector_v: (list)    # knot vector (v-direction)
-- size_u: (int)           # number of control points on the u-direction
-- size_v: (int)           # number of control points on the v-direction
-- control_points:
-  - points: (list)        # Cartesian coordinates of the control points
-  - weights: (list)       # weights vector (optional)
-```
-
-## Function reference
-
-* `rw3dm.read(filename, data_out)`: Reads .3DM files
-* `rw3dm.write(data_in, filename)`: Writes .3DM files
-
-`filename` is a string, `data_in` and `data_out` are lists of dictionaries containing the NURBS curve and surface data.
-Please refer to the Data Structures section above for details on the structure of the surface and curve dictionaries.
 
 ## Author
 
@@ -127,6 +73,6 @@ Please refer to the Data Structures section above for details on the structure o
 
 ## License
 
-* RW3DM project is available under the MIT License.
-* [OpenNURBS](https://github.com/mcneel/opennurbs) is available under the MIT license
-* [pybind11](https://github.com/pybind/pybind11) is available under a BSD-style license
+* RW3DM project licensed under the terms of the [MIT License](LICENSE).
+* [JsonCpp](https://github.com/open-source-parsers/jsoncpp) is licensed under the terms of the [MIT License](https://github.com/open-source-parsers/jsoncpp/blob/master/LICENSE)
+* [OpenNURBS](https://github.com/mcneel/opennurbs) is licensed under the terms of the [MIT license](https://www.rhino3d.com/opennurbs)
