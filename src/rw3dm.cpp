@@ -188,6 +188,31 @@ void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data
         }
         faceIdx++;
     }
+
+    // Trim loop
+    if (cfg.trims())
+    {
+        Json::Value trimsData;
+        unsigned int trimIdx = 0;
+        unsigned int curveIdx = 0;
+        ON_BrepTrim *brepTrim;
+        while (brepTrim = brep->Trim(trimIdx))
+        {
+            const ON_Curve *trimCurve = brepTrim->TrimCurveOf();
+            if (trimCurve)
+            {
+                Json::Value trimCurveData;
+                extractCurveData(trimCurve, cfg, trimCurveData);
+                trimsData[curveIdx] = trimCurveData;
+                curveIdx++;
+            }
+            trimIdx++;
+        }
+
+        // Because of the standardization, there should be 1 trim curve and 1 surface
+        if (trimsData.size() > 0)
+            data[0]["trims"] = trimsData;
+    }
 }
 
 void constructCurveData(ONX_Model &model, Config &cfg, Json::Value &data)
