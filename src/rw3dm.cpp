@@ -163,13 +163,22 @@ void extractSurfaceData(const ON_Geometry* geometry, Config &cfg, Json::Value &d
 
 void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data)
 {
-    ON_Brep *geo = (ON_Brep *)geometry;
+    // We know that "geometry" is a BRep object
+    ON_Brep *brep = (ON_Brep *)geometry;
+
+    // Standardize relationships of all surfaces, edges and trims in the BRep object
+    brep->Standardize();
+
+    // Delete unnecessary curves and surfaces after "standardize"
+    brep->Compact();
+
+    // Face loop
     unsigned int faceIdx = 0;
     unsigned int surfIdx = 0;
-    ON_BrepFace *face;
-    while (face = geo->Face(faceIdx))
+    ON_BrepFace *brepFace;
+    while (brepFace = brep->Face(faceIdx))
     {
-        const ON_Surface *faceSurf = face->SurfaceOf();
+        const ON_Surface *faceSurf = brepFace->SurfaceOf();
         if (faceSurf)
         {
             Json::Value surfData;
