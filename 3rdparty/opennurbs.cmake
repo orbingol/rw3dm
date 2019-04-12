@@ -35,7 +35,6 @@ target_compile_definitions(zlib
   PRIVATE -DMY_ZCALLOC
   PRIVATE -DZ_PREFIX
 )
-set_target_properties(zlib PROPERTIES DEBUG_POSTFIX "_d")
 set_property(TARGET zlib PROPERTY CXX_STANDARD 17)
 
 # Set link libraries for OpenNURBS
@@ -50,7 +49,6 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
   # Compile UUID as a static library
   add_library(uuid STATIC ${ON_UUID_SRC})
-  set_target_properties(uuid PROPERTIES DEBUG_POSTFIX "_d")
   set_property(TARGET uuid PROPERTY CXX_STANDARD 17)
   set(ON_LINK_LIBS ${ON_LINK_LIBS} uuid)
 endif()
@@ -69,7 +67,6 @@ add_library(opennurbs STATIC ${ON_SRC})
 target_compile_definitions(opennurbs
   PRIVATE ${ON_COMP_DIRECTIVES}
 )
-set_target_properties(opennurbs PROPERTIES DEBUG_POSTFIX "_d")
 target_link_libraries(opennurbs PRIVATE ${ON_LINK_LIBS})
 target_include_directories(opennurbs PUBLIC "${CMAKE_CURRENT_LIST_DIR}/opennurbs")
 set_property(TARGET opennurbs PROPERTY CXX_STANDARD 17)
