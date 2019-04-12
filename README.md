@@ -73,6 +73,6 @@ and writing functions.
 
 ## License
 
-* RW3DM project licensed under the terms of the [MIT License](LICENSE).
+* RW3DM is licensed under the terms of the [MIT License](LICENSE).
 * [JsonCpp](https://github.com/open-source-parsers/jsoncpp) is licensed under the terms of the [MIT License](https://github.com/open-source-parsers/jsoncpp/blob/master/LICENSE)
 * [OpenNURBS](https://github.com/mcneel/opennurbs) is licensed under the terms of the [MIT license](https://www.rhino3d.com/opennurbs)
