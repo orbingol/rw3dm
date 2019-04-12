@@ -1,4 +1,4 @@
-# RW3DM - OpenNURBS/Rhino Extensions for NURBS-Python (geomdl)
+# RW3DM - Rhino Extensions for NURBS-Python (geomdl)
 
 RW3DM is a Python module for extracting NURBS curves and surfaces from OpenNURBS/Rhino .3DM files. It uses
 [OpenNURBS](https://github.com/mcneel/opennurbs) library for reading and writing .3DM files
