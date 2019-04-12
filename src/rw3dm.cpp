@@ -1,194 +1,85 @@
+/*
+Copyright (c) 2018-2019 Onur Rauf Bingol
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 #include "rw3dm.h"
 
-void startON()
+
+void initializeRwExt()
 {
     ON::Begin();
 }
 
-void stopON()
+void finalizeRwExt()
 {
     ON::End();
 }
 
-bool readONFile(std::string file_name, py::list &data)
-{
-    // Open file
-    FILE* fp = ON::OpenFile(file_name.c_str(), "rb");
-    if (!fp)
-    {
-        py::print("Cannot open file: " + file_name);
-        return false;
-    }
-
-    // Create achive object from file pointer
-    ON_BinaryFile archive(ON::archive_mode::read3dm, fp);
-
-    ONX_Model model;
-
-    // Start reading the model archive
-    unsigned int tableFilter = ON::curve_object | ON::surface_object;
-    if (!model.IncrementalReadBegin(archive, true, tableFilter, (ON_TextLog *)nullptr))
-    {
-        py::print("Problem in start reading the model archive");
-        return false;
-    }
-
-    // Read models
-    ON_ModelComponentReference mCompRef;
-    while (model.IncrementalReadModelGeometry(archive, true, true, true, 0, mCompRef))
-    {
-        // Check if there are any models to read
-        if (!mCompRef.IsEmpty())
-        {
-            const ON_ModelGeometryComponent &geometryComp = model.ModelGeometryComponentFromId(mCompRef.ModelComponentId());
-            const ON_Geometry *geometry = geometryComp.Geometry((ON_Geometry *)nullptr);
-            if (geometry != nullptr)
-            {
-                switch (geometry->ObjectType())
-                {
-                case ON::curve_object:
-                    _readCurve(geometry, data);
-                    break;
-                case ON::surface_object:
-                    _readSurface(geometry, data);
-                    break;
-                case ON::brep_object:
-                    _readBrep(geometry, data);
-                    break;
-                default:
-                    break;
-                }
-            }
-        }
-    }
-
-    // Finish reading the model archive
-    if (!model.IncrementalReadFinish(archive, true, tableFilter, (ON_TextLog *)nullptr))
-    {
-        py::print("Problem in finish reading the model archive");
-        return false;
-    }
-
-    // Close file
-    ON::CloseFile(fp);
-
-    return true;
-}
-
-bool writeONFile(py::list &data, std::string file_name, py::kwargs &kwargs)
-{
-    // Get keyword arguments
-    int version = 50;
-    if (kwargs.contains("version"))
-        version = py::cast<int>(kwargs["version"]);
-
-    // Create model
-    ONX_Model model;
-
-    // Read shape data
-    for (auto d : data)
-    {
-        py::dict dd = py::cast<py::dict>(d);
-        if (dd.contains("shape_type"))
-        {
-            std::string shape_type = py::cast<std::string>(dd["shape_type"]);
-            if (shape_type == "curve")
-                if (!_constructCurve(model, dd))
-                    return false;
-            if (shape_type == "surface")
-                if (!_constructSurface(model, dd))
-                    return false;
-        }
-    }
-
-    // Write model to the file
-    model.Write(file_name.c_str(), version);
-
-    return true;
-}
-
-void _readCurve(const ON_Geometry* geometry, py::list &data)
+void extractCurveData(const ON_Geometry* geometry, Config &cfg, Json::Value &data)
 {
     // We know that "geometry" is a curve object
     const ON_Curve *curve = (ON_Curve *)geometry;
 
-    // Construct the dictionary
-    py::dict dataDict;
-    _constructDict(curve, dataDict);
-    data.append(dataDict);
-}
-
-void _readSurface(const ON_Geometry* geometry, py::list &data)
-{
-    // We know that "geometry" is a surface object
-    const ON_Surface *surface = (ON_Surface *)geometry;
-
-    // Construct the dictionary
-    py::dict dataDict;
-    _constructDict(surface, dataDict);
-    data.append(dataDict);
-}
-
-void _readBrep(const ON_Geometry* geometry, py::list &data)
-{
-    ON_Brep *geo = (ON_Brep *)geometry;
-    unsigned int brepFaceIndex = 0;
-    ON_BrepFace *face;
-    while (face = geo->Face(brepFaceIndex))
-    {
-        const ON_Surface *faceSurf = face->SurfaceOf();
-        if (faceSurf)
-        {
-            py::dict dataDict;
-            _constructDict(faceSurf, dataDict);
-            data.append(dataDict);
-        }
-        brepFaceIndex++;
-    }
-}
-
-void _constructDict(const ON_Curve *curve, py::dict &data)
-{
     // Try to get the NURBS form of the curve object
     ON_NurbsCurve nurbsCurve;
     if (curve->NurbsCurve(&nurbsCurve))
     {
-        // Set shape type
-        data["shape_type"] = "curve";
+        // Get rational
+        data["rational"] = nurbsCurve.IsRational();
 
         // Get degree
         data["degree"] = nurbsCurve.Degree();
 
         // Get knot vector
-        py::list knotVector;
+        Json::Value knotVector;
+        knotVector.append(nurbsCurve.SuperfluousKnot(false));
         for (int idx = 0; idx < nurbsCurve.KnotCount(); idx++)
-            knotVector.append(nurbsCurve.Knot(idx));
+            knotVector[idx] = nurbsCurve.Knot(idx);
+        knotVector.append(nurbsCurve.SuperfluousKnot(true));
         data["knotvector"] = knotVector;
 
-        py::dict controlPoints;
+        Json::Value controlPoints;
+        Json::Value points;
 
         // Get control points
         int numCoords = nurbsCurve.IsRational() ? nurbsCurve.CVSize() - 1 : nurbsCurve.CVSize();
-        py::list points;
         for (int idx = 0; idx < nurbsCurve.CVCount(); idx++)
         {
             double *vertex = nurbsCurve.CV(idx);
-            py::list point;
+            Json::Value point;
             for (int c = 0; c < numCoords; c++)
-                point.append(vertex[c]);
-            points.append(point);
+                point[c] = vertex[c];
+            points[idx] = point;
         }
         controlPoints["points"] = points;
 
         // Check if the NURBS curve is rational
         if (nurbsCurve.IsRational())
         {
+            Json::Value weights;
             // Get weights
-            py::list weights;
             for (int idx = 0; idx < nurbsCurve.CVCount(); idx++)
             {
                 double *vertex = nurbsCurve.CV(idx);
-                weights.append(vertex[numCoords - 1]);
+                weights[idx] = vertex[numCoords - 1];
             }
             controlPoints["weights"] = weights;
         }
@@ -196,46 +87,54 @@ void _constructDict(const ON_Curve *curve, py::dict &data)
     }
 }
 
-void _constructDict(const ON_Surface *surf, py::dict &data)
+void extractSurfaceData(const ON_Geometry* geometry, Config &cfg, Json::Value &data)
 {
+    // We know that "geometry" is a surface object
+    const ON_Surface *surface = (ON_Surface *)geometry;
+
     // Try to get the NURBS form of the surface object
     ON_NurbsSurface nurbsSurface;
-    if (surf->NurbsSurface(&nurbsSurface))
+    if (surface->NurbsSurface(&nurbsSurface))
     {
-        // Set shape type
-        data["shape_type"] = "surface";
+        // Get rational
+        data["rational"] = nurbsSurface.IsRational();
 
         // Get degrees
         data["degree_u"] = nurbsSurface.Degree(0);
         data["degree_v"] = nurbsSurface.Degree(1);
 
         // Get knot vectors
-        py::list knotVectorU;
+        Json::Value knotVectorU;
+        knotVectorU.append(nurbsSurface.SuperfluousKnot(0, false));
         for (int idx = 0; idx < nurbsSurface.KnotCount(0); idx++)
-            knotVectorU.append(nurbsSurface.Knot(0, idx));
+            knotVectorU[idx] = nurbsSurface.Knot(0, idx);
+        knotVectorU.append(nurbsSurface.SuperfluousKnot(0, true));
         data["knotvector_u"] = knotVectorU;
 
-        py::list knotVectorV;
+        Json::Value knotVectorV;
+        knotVectorV.append(nurbsSurface.SuperfluousKnot(1, false));
         for (int idx = 0; idx < nurbsSurface.KnotCount(1); idx++)
-            knotVectorV.append(nurbsSurface.Knot(1, idx));
+            knotVectorV[idx] = nurbsSurface.Knot(1, idx);
+        knotVectorV.append(nurbsSurface.SuperfluousKnot(1, true));
         data["knotvector_v"] = knotVectorV;
 
-        py::dict controlPoints;
+        Json::Value controlPoints;
+        Json::Value points;
 
         // Get control points
         int numCoords = nurbsSurface.IsRational() ? nurbsSurface.CVSize() - 1 : nurbsSurface.CVSize();
         int sizeU = nurbsSurface.CVCount(0);
         int sizeV = nurbsSurface.CVCount(1);
-        py::list points;
         for (int idxU = 0; idxU < sizeU; idxU++)
         {
             for (int idxV = 0; idxV < sizeV; idxV++)
             {
+                unsigned int idx = idxV + (idxU * sizeV);
                 double *vertex = nurbsSurface.CV(idxU, idxV);
-                py::list point;
+                Json::Value point;
                 for (int c = 0; c < numCoords; c++)
-                    point.append(vertex[c]);
-                points.append(point);
+                    point[c] = vertex[c];
+                points[idx] = point;
             }
         }
         controlPoints["points"] = points;
@@ -243,14 +142,15 @@ void _constructDict(const ON_Surface *surf, py::dict &data)
         // Check if the NURBS surface is rational
         if (nurbsSurface.IsRational())
         {
+            Json::Value weights;
             // Get weights
-            py::list weights;
             for (int idxU = 0; idxU < sizeU; idxU++)
             {
                 for (int idxV = 0; idxV < sizeV; idxV++)
                 {
+                    unsigned int idx = idxV + (idxU * sizeV);
                     double *vertex = nurbsSurface.CV(idxU, idxV);
-                    weights.append(vertex[numCoords - 1]);
+                    weights[idx] = vertex[numCoords - 1];
                 }
             }
             controlPoints["weights"] = weights;
@@ -261,74 +161,67 @@ void _constructDict(const ON_Surface *surf, py::dict &data)
     }
 }
 
-
-bool _constructCurve(ONX_Model &model, py::dict &data)
+void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data)
 {
-    // Check for required variables
-    std::vector<std::string> requiredVariables = {
-        "degree",
-        "knotvector",
-        "control_points"
-    };
-    for (auto reqVar : requiredVariables)
+    ON_Brep *geo = (ON_Brep *)geometry;
+    unsigned int faceIdx = 0;
+    unsigned int surfIdx = 0;
+    ON_BrepFace *face;
+    while (face = geo->Face(faceIdx))
     {
-        if (!data.contains(reqVar.c_str()))
-            return false;
+        const ON_Surface *faceSurf = face->SurfaceOf();
+        if (faceSurf)
+        {
+            Json::Value surfData;
+            extractSurfaceData(faceSurf, cfg, surfData);
+            data[surfIdx] = surfData;
+            surfIdx++;
+        }
+        faceIdx++;
     }
+}
 
-    // Get knot vector
-    py::list knotVector = py::cast<py::list>(data["knotvector"]);
-
-    // Get control points and weights
-    py::dict controlPoints = py::cast<py::dict>(data["control_points"]);
-
-    if (!controlPoints.contains("points"))
-        return false;
-
-    py::list points = py::cast<py::list>(controlPoints["points"]);
-    py::list weights;
-    if (controlPoints.contains("weights"))
-    {
-        weights = py::cast<py::list>(controlPoints["weights"]);
-    }
-    else
-    {
-        for (int i = 0; i < points.size(); i++)
-            weights.append(1.0);
-    }
-
-    // Get dimension
-    int dimension;
-    if (data.contains("dimension"))
-         dimension = py::cast<int>(data["dimension"]);
-    else
-        dimension = (int) py::cast<py::list>(points[0]).size();
+void constructCurveData(ONX_Model &model, Config &cfg, Json::Value &data)
+{
+    // Spatial dimension
+    int dimension = data["control_points"]["points"][0].size();
 
     // Can only work with 2- and 3-dimensional curves
     if (dimension > 3 || dimension < 2)
-        return false;
+    {
+        if (cfg.warnings())
+            std::cout << "[WARNING]: OpenNURBS supports 2- and 3-dimensional curves only. Skipping..." << std::endl;
+        return;
+    }
+ 
+    // Number of control points
+    int numCtrlpts = data["control_points"]["points"].size();
 
     // Create OpenNURBS curve instance
     ON_NurbsCurve nurbsCurve(
         dimension,
         true,
-        py::cast<int>(data["degree"]) + 1,
-        (int)points.size()
+        data["degree"].asInt() + 1,
+        numCtrlpts
     );
 
     // Set knot vector
     for (int idx = 0; idx < nurbsCurve.KnotCount(); idx++)
-        nurbsCurve.SetKnot(idx, py::cast<double>(knotVector[idx]));
+        nurbsCurve.SetKnot(idx, data["knotvector"][idx].asDouble());
 
     // Set control points
     for (int idx = 0; idx < nurbsCurve.CVCount(); idx++)
     {
-        py::list cptDict = py::cast<py::list>(points[idx]);
-        double w = py::cast<double>(weights[idx]);
+        Json::Value cptData = data["control_points"]["points"][idx];
+        double w;
+        if (data["rational"] == 0)
+            w = 1.0;
+        else
+            w = data["control_points"]["weights"][idx].asDouble();
         ON_4dPoint cpt(
-            py::cast<double>(cptDict[0]) * w,
-            py::cast<double>(cptDict[1]) * w,
-            (dimension == 2) ? 0.0 : py::cast<double>(cptDict[2]) * w,
+            cptData[0].asDouble() * w,
+            cptData[1].asDouble() * w,
+            (dimension == 2) ? 0.0 : cptData[2].asDouble() * w,
             w
         );
         nurbsCurve.SetCV(idx, cpt);
@@ -336,87 +229,57 @@ bool _constructCurve(ONX_Model &model, py::dict &data)
 
     // Add curve to the model
     model.AddModelGeometryComponent(&nurbsCurve, nullptr);
-
-    return true;
 }
 
-bool _constructSurface(ONX_Model &model, py::dict &data)
+void constructSurfaceData(ONX_Model &model, Config &cfg, Json::Value &data)
 {
-    // Check for required variables
-    std::vector<std::string> requiredVariables = {
-        "degree_u", "degree_v",
-        "knotvector_u", "knotvector_v",
-        "size_u", "size_v", "control_points"
-    };
-    for (auto reqVar : requiredVariables)
-    {
-        if (!data.contains(reqVar.c_str()))
-            return false;
-    }
-
-    // Get knot vectors
-    py::list knotVectorU = py::cast<py::list>(data["knotvector_u"]);
-    py::list knotVectorV = py::cast<py::list>(data["knotvector_v"]);
-
-    // Get control points and weights
-    py::dict controlPoints = py::cast<py::dict>(data["control_points"]);
-
-    if (!controlPoints.contains("points"))
-        return false;
-
-    int sizeU = py::cast<int>(data["size_u"]);
-    int sizeV = py::cast<int>(data["size_v"]);
-    py::list points = py::cast<py::list>(controlPoints["points"]);
-    py::list weights;
-    if (controlPoints.contains("weights"))
-    {
-        weights = py::cast<py::list>(controlPoints["weights"]);
-    }
-    else
-    {
-        for (int i = 0; i < points.size(); i++)
-            weights.append(1.0);
-    }
-
-    // Get dimension
-    int dimension;
-    if (data.contains("dimension"))
-        dimension = py::cast<int>(data["dimension"]);
-    else
-        dimension = (int) py::cast<py::list>(points[0]).size();
+    // Spatial dimension
+    int dimension = data["control_points"]["points"][0].size();
 
     // Can only work with 3-dimensional surfaces
-    if (dimension != 3)
-        return false;
+    if (dimension > 3 || dimension < 2)
+    {
+        if (cfg.warnings())
+            std::cout << "[WARNING]: OpenNURBS supports 3-dimensional surfaces only. Skipping..." << std::endl;
+        return;
+    }
+
+    // Number of control points
+    int sizeU = data["size_u"].asInt();
+    int sizeV = data["size_v"].asInt();
 
     // Create OpenNURBS surface instance
     ON_NurbsSurface nurbsSurface(
         dimension,
         true,
-        py::cast<int>(data["degree_u"]) + 1,
-        py::cast<int>(data["degree_v"]) + 1,
+        data["degree_u"].asInt() + 1,
+        data["degree_v"].asInt() + 1,
         sizeU,
         sizeV
     );
 
     // Set knot vectors
     for (int idx = 0; idx < nurbsSurface.KnotCount(0); idx++)
-        nurbsSurface.SetKnot(0, idx, py::cast<double>(knotVectorU[idx]));
+        nurbsSurface.SetKnot(0, idx, data["knotvector_u"][idx].asDouble());
     for (int idx = 0; idx < nurbsSurface.KnotCount(1); idx++)
-        nurbsSurface.SetKnot(1, idx, py::cast<double>(knotVectorV[idx]));
+        nurbsSurface.SetKnot(1, idx, data["knotvector_v"][idx].asDouble());
 
     // Set control points
     for (int idxU = 0; idxU < nurbsSurface.CVCount(0); idxU++)
     {
         for (int idxV = 0; idxV < nurbsSurface.CVCount(1); idxV++)
         {
-            int idx = idxV + (sizeV * idxU);
-            py::list cptDict = py::cast<py::list>(points[idx]);
-            double w = py::cast<double>(weights[idx]);
+            unsigned int idx = idxV + (idxU * sizeV);
+            Json::Value cptData = data["control_points"]["points"][idx];
+            double w;
+            if (data["rational"] == 0)
+                w = 1.0;
+            else
+                w = data["control_points"]["weights"][idx].asDouble();
             ON_4dPoint cpt(
-                py::cast<double>(cptDict[0]) * w,
-                py::cast<double>(cptDict[1]) * w,
-                py::cast<double>(cptDict[2]) * w,
+                cptData[0].asDouble() * w,
+                cptData[1].asDouble() * w,
+                cptData[2].asDouble() * w,
                 w
             );
             nurbsSurface.SetCV(idxU, idxV, cpt);
@@ -429,6 +292,4 @@ bool _constructSurface(ONX_Model &model, py::dict &data)
 
     // Add BRep to the model
     model.AddModelGeometryComponent(&brep, nullptr);
-
-    return true;
 }
