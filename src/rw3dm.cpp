@@ -279,7 +279,8 @@ void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data
     }
 }
 
-void constructCurveData(ONX_Model &model, Config &cfg, Json::Value &data)
+ON_ModelComponentReference
+constructCurveData(Json::Value &data, Config &cfg, ONX_Model &model)
 {
     // Spatial dimension
     int dimension = data["control_points"]["points"][0].size();
@@ -326,10 +327,11 @@ void constructCurveData(ONX_Model &model, Config &cfg, Json::Value &data)
     }
 
     // Add curve to the model
-    model.AddModelGeometryComponent(&nurbsCurve, nullptr);
+    return model.AddModelGeometryComponent(&nurbsCurve, nullptr);
 }
 
-void constructSurfaceData(ONX_Model &model, Config &cfg, Json::Value &data)
+ON_ModelComponentReference
+constructSurfaceData(Json::Value &data, Config &cfg, ONX_Model &model)
 {
     // Spatial dimension
     int dimension = data["control_points"]["points"][0].size();
@@ -389,5 +391,5 @@ void constructSurfaceData(ONX_Model &model, Config &cfg, Json::Value &data)
     brep.NewFace(nurbsSurface);
 
     // Add BRep to the model
-    model.AddModelGeometryComponent(&brep, nullptr);
+    return model.AddModelGeometryComponent(&brep, nullptr);
 }

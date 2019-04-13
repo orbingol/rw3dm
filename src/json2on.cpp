@@ -83,9 +83,9 @@ int main(int argc, char **argv)
     for (auto d : root["shape"]["data"])
     {
         if (root["shape"]["type"].asString() == "curve")
-            constructCurveData(model, cfg, d);
+            constructCurveData(d, cfg, model);
         if (root["shape"]["type"].asString() == "surface")
-            constructSurfaceData(model, cfg, d);
+            constructSurfaceData(d, cfg, model);
     }
 
     // Write model to the file (version = 50)
