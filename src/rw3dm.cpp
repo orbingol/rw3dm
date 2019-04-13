@@ -55,10 +55,14 @@ void extractCurveData(const ON_Geometry* geometry, Config &cfg, Json::Value &dat
         Json::Value knotVector;
         if (cfg.normalize())
         {
-            knotVector.append(0.0);
+            // Get parametric domain
+            double *d = nurbsCurve.Domain().m_t;
+
+            // Normalize knot vector
+            knotVector.append((nurbsCurve.SuperfluousKnot(false) - d[0]) / (d[1] - d[0]));
             for (int idx = 0; idx < nurbsCurve.KnotCount(); idx++)
-                knotVector[idx + 1] = (nurbsCurve.Knot(idx) - nurbsCurve.SuperfluousKnot(false)) / (nurbsCurve.SuperfluousKnot(true) - nurbsCurve.SuperfluousKnot(false));
-            knotVector.append(1.0);
+                knotVector[idx + 1] = (nurbsCurve.Knot(idx) - d[0]) / (d[1] - d[0]);
+            knotVector.append((nurbsCurve.SuperfluousKnot(true) - d[0]) / (d[1] - d[0]));
         }
         else
         {
@@ -119,10 +123,14 @@ void extractSurfaceData(const ON_Geometry* geometry, Config &cfg, Json::Value &d
         Json::Value knotVectorU;
         if (cfg.normalize())
         {
-            knotVectorU.append(0.0);
+            // Get parametric domain
+            double *dU = nurbsSurface.Domain(0).m_t;
+
+            // Normalize knot vector
+            knotVectorU.append((nurbsSurface.SuperfluousKnot(0, false) - dU[0]) / (dU[1] - dU[0]));
             for (int idx = 0; idx < nurbsSurface.KnotCount(0); idx++)
-                knotVectorU[idx + 1] = (nurbsSurface.Knot(0, idx) - nurbsSurface.SuperfluousKnot(0, false)) / (nurbsSurface.SuperfluousKnot(0, true) - nurbsSurface.SuperfluousKnot(0, false));
-            knotVectorU.append(1.0);
+                knotVectorU[idx + 1] = (nurbsSurface.Knot(0, idx) - dU[0]) / (dU[1] - dU[0]);
+            knotVectorU.append((nurbsSurface.SuperfluousKnot(0, true) - dU[0]) / (dU[1] - dU[0]));
         }
         else
         {
@@ -136,10 +144,14 @@ void extractSurfaceData(const ON_Geometry* geometry, Config &cfg, Json::Value &d
         Json::Value knotVectorV;
         if (cfg.normalize())
         {
-            knotVectorV.append(0.0);
+            // Get parametric domain
+            double *dV = nurbsSurface.Domain(1).m_t;
+
+            // Normalize knot vector
+            knotVectorV.append((nurbsSurface.SuperfluousKnot(1, false) - dV[0]) / (dV[1] - dV[0]));
             for (int idx = 0; idx < nurbsSurface.KnotCount(1); idx++)
-                knotVectorV[idx + 1] = (nurbsSurface.Knot(1, idx) - nurbsSurface.SuperfluousKnot(1, false)) / (nurbsSurface.SuperfluousKnot(1, true) - nurbsSurface.SuperfluousKnot(1, false));
-            knotVectorV.append(1.0);
+                knotVectorV[idx + 1] = (nurbsSurface.Knot(1, idx) - dV[0]) / (dV[1] - dV[0]);
+            knotVectorV.append((nurbsSurface.SuperfluousKnot(1, true) - dV[0]) / (dV[1] - dV[0]));
         }
         else
         {
