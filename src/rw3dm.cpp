@@ -366,6 +366,27 @@ constructSurfaceData(Json::Value &data, Config &cfg, ONX_Model &model)
     // Add surface to the BRep object
     brep.NewFace(nurbsSurface);
 
+    // Process trims
+    if (data.isMember("trims"))
+    {
+        Json::Value trims = data["trims"];
+        if (trims.isMember("data"))
+        {
+            ONX_Model trimModel;
+            for (auto trim : trims["trims"]["data"])
+            {
+                // Construct the trim curve and get its reference
+                ON_ModelComponentReference trimRef = constructCurveData(trim, cfg, trimModel);
+                // Start converting reference to the curve object
+                const ON_ModelGeometryComponent *trimGeomComp = ON_ModelGeometryComponent::FromModelComponentRef(trimRef, nullptr);
+                ON_Geometry *trimGeom = trimGeomComp->ExclusiveGeometry();
+                ON_Curve *trimCurve = ON_Curve::Cast(trimGeom);
+                // Add trim curve to the BRep object
+                brep.AddTrimCurve(trimCurve);
+            }
+        }
+    }
+
     // Add BRep to the model
     return model.AddModelGeometryComponent(&brep, nullptr);
 }
