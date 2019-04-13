@@ -35,7 +35,6 @@ target_compile_definitions(zlib
   PRIVATE -DMY_ZCALLOC
   PRIVATE -DZ_PREFIX
 )
-set_property(TARGET zlib PROPERTY CXX_STANDARD 17)
 
 # Set link libraries for OpenNURBS
 set(ON_LINK_LIBS zlib)
@@ -43,20 +42,19 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
   set(ON_LINK_LIBS ${ON_LINK_LIBS} shlwapi)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   # Include UUID source
-  file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.c" "opennurbs/android_uuid/gen_uuid_nt.skip")
+  file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.c" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.skip")
   file(GLOB ON_UUID_SRC "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/*.h" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/*.c")
   file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.skip" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.c")
 
   # Compile UUID as a static library
   add_library(uuid STATIC ${ON_UUID_SRC})
-  set_property(TARGET uuid PROPERTY CXX_STANDARD 17)
   set(ON_LINK_LIBS ${ON_LINK_LIBS} uuid)
 endif()
 
 # Include OpenNURBS source
-file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_gl.cpp" "opennurbs/opennurbs_gl.skip")
-file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp932.cpp" "opennurbs/opennurbs_unicode_cp932.skip")
-file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp949.cpp" "opennurbs/opennurbs_unicode_cp949.skip")
+file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_gl.cpp" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_gl.skip")
+file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp932.cpp" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp932.skip")
+file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp949.cpp" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp949.skip")
 file(GLOB ON_SRC "${CMAKE_CURRENT_LIST_DIR}/opennurbs/*.h" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/*.cpp")
 file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_gl.skip" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_gl.cpp")
 file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp932.skip" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp932.cpp")
@@ -69,4 +67,3 @@ target_compile_definitions(opennurbs
 )
 target_link_libraries(opennurbs PRIVATE ${ON_LINK_LIBS})
 target_include_directories(opennurbs PUBLIC "${CMAKE_CURRENT_LIST_DIR}/opennurbs")
-set_property(TARGET opennurbs PROPERTY CXX_STANDARD 17)

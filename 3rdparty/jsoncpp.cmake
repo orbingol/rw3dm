@@ -7,5 +7,4 @@ set(JSONCPP_SRC
 
 # Compile jsoncpp as a static library
 add_library(jsoncpp STATIC ${JSONCPP_SRC})
-set_property(TARGET jsoncpp PROPERTY CXX_STANDARD 17)
 target_include_directories(jsoncpp PUBLIC "${CMAKE_CURRENT_LIST_DIR}/jsoncpp")
