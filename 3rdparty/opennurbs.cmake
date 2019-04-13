@@ -1,6 +1,6 @@
 # Inspired from https://github.com/mcneel/rhino3dm
 
-# OpenNURBS required compiler directives
+# Compiler directives
 set(ON_COMP_DIRECTIVES
   -D_GNU_SOURCE
   -DON_COMPILING_OPENNURBS
@@ -12,15 +12,7 @@ set(ON_COMP_DIRECTIVES
   -DZ_PREFIX
 )
 
-# Unfortunately, OpenNURBS does not like "WIN32" preprocessor definitions on x64
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-  if(${CMAKE_SIZEOF_VOID_P} EQUAL "8")
-    string(REPLACE "/DWIN32" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-    set(ON_COMP_DIRECTIVES ${ON_COMP_DIRECTIVES} -DWIN64)
-  endif()
-endif()
-
-# Include OpenNURBS source
+# OpenNURBS source
 file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_gl.cpp" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_gl.skip")
 file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp932.cpp" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp932.skip")
 file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp949.cpp" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp949.skip")
@@ -29,19 +21,41 @@ file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_gl.skip" "${CMAKE_CUR
 file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp932.skip" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp932.cpp")
 file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp949.skip" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp949.cpp")
 
-# Include zlib source
+# zlib source (included with OpenNURBS)
 file(GLOB ON_ZLIB_SRC "${CMAKE_CURRENT_LIST_DIR}/opennurbs/zlib/*.h" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/zlib/*.c")
-set(ON_SRC ${ON_ZLIB_SRC} ${ON_SRC})
 
-# Include UUID source
+# Generate zlib as a static library
+add_library(zlib STATIC ${ON_ZLIB_SRC})
+
+# Add zlib to the link libraries
+set(ON_LINK_LIBRARIES zlib)
+
+# OpenNURBS fixes for Windows
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  # Unfortunately, OpenNURBS does not like "WIN32" preprocessor definitions on x64
+  if(${CMAKE_SIZEOF_VOID_P} EQUAL "8")
+    string(REPLACE "/DWIN32" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+    set(ON_COMP_DIRECTIVES ${ON_COMP_DIRECTIVES} -DWIN64)
+  endif()
+
+  # Add shlwapi to the link libraries
+  set(ON_LINK_LIBRARIES ${ON_LINK_LIBRARIES} shlwapi)
+endif()
+
+# OpenNURBS fixes for Linux
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  # Include UUID source for Linux
+  # Include UUID source (included with OpenNURBS)
   file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.c" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.skip")
   file(GLOB ON_UUID_SRC "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/*.h" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/*.c")
   file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.skip" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.c")
-  set(ON_SRC ${ON_UUID_SRC} ${ON_SRC})
 
-  # Additional compiler directives for Linux
+  # Generate uuid as a static library
+  add_library(uuid STATIC ${ON_UUID_SRC})
+
+  # Add uuid to the link libraries
+  set(ON_LINK_LIBRARIES ${ON_LINK_LIBRARIES} uuid)
+
+  # Update compiler directives
   set(ON_COMP_DIRECTIVES
     ${ON_COMP_DIRECTIVES}
     -DON_RUNTIME_LINUX
@@ -70,10 +84,8 @@ else()
   add_library(opennurbs STATIC ${ON_SRC})
 endif()
 
-# shlwapi only required for Windows
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-  target_link_libraries(opennurbs PRIVATE shlwapi)
-endif()
+# Link OpenNURBS library
+target_link_libraries(opennurbs PRIVATE ${ON_LINK_LIBRARIES})
 
 # Add compiler definitions for OpenNURBS
 target_compile_definitions(opennurbs
