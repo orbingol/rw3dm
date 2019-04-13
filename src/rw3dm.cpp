@@ -53,10 +53,20 @@ void extractCurveData(const ON_Geometry* geometry, Config &cfg, Json::Value &dat
 
         // Get knot vector
         Json::Value knotVector;
-        knotVector.append(nurbsCurve.SuperfluousKnot(false));
-        for (int idx = 0; idx < nurbsCurve.KnotCount(); idx++)
-            knotVector[idx] = nurbsCurve.Knot(idx);
-        knotVector.append(nurbsCurve.SuperfluousKnot(true));
+        if (cfg.normalize())
+        {
+            knotVector.append(0.0);
+            for (int idx = 0; idx < nurbsCurve.KnotCount(); idx++)
+                knotVector[idx + 1] = (nurbsCurve.Knot(idx) - nurbsCurve.SuperfluousKnot(false)) / (nurbsCurve.SuperfluousKnot(true) - nurbsCurve.SuperfluousKnot(false));
+            knotVector.append(1.0);
+        }
+        else
+        {
+            knotVector.append(nurbsCurve.SuperfluousKnot(false));
+            for (int idx = 0; idx < nurbsCurve.KnotCount(); idx++)
+                knotVector[idx + 1] = nurbsCurve.Knot(idx);
+            knotVector.append(nurbsCurve.SuperfluousKnot(true));
+        }
         data["knotvector"] = knotVector;
 
         Json::Value controlPoints;
@@ -111,17 +121,37 @@ void extractSurfaceData(const ON_Geometry* geometry, Config &cfg, Json::Value &d
 
         // Get knot vectors
         Json::Value knotVectorU;
-        knotVectorU.append(nurbsSurface.SuperfluousKnot(0, false));
-        for (int idx = 0; idx < nurbsSurface.KnotCount(0); idx++)
-            knotVectorU[idx] = nurbsSurface.Knot(0, idx);
-        knotVectorU.append(nurbsSurface.SuperfluousKnot(0, true));
+        if (cfg.normalize())
+        {
+            knotVectorU.append(0.0);
+            for (int idx = 0; idx < nurbsSurface.KnotCount(0); idx++)
+                knotVectorU[idx + 1] = (nurbsSurface.Knot(0, idx) - nurbsSurface.SuperfluousKnot(0, false)) / (nurbsSurface.SuperfluousKnot(0, true) - nurbsSurface.SuperfluousKnot(0, false));
+            knotVectorU.append(1.0);
+        }
+        else
+        {
+            knotVectorU.append(nurbsSurface.SuperfluousKnot(0, false));
+            for (int idx = 0; idx < nurbsSurface.KnotCount(0); idx++)
+                knotVectorU[idx + 1] = nurbsSurface.Knot(0, idx);
+            knotVectorU.append(nurbsSurface.SuperfluousKnot(0, true));
+        }
         data["knotvector_u"] = knotVectorU;
 
         Json::Value knotVectorV;
-        knotVectorV.append(nurbsSurface.SuperfluousKnot(1, false));
-        for (int idx = 0; idx < nurbsSurface.KnotCount(1); idx++)
-            knotVectorV[idx] = nurbsSurface.Knot(1, idx);
-        knotVectorV.append(nurbsSurface.SuperfluousKnot(1, true));
+        if (cfg.normalize())
+        {
+            knotVectorV.append(0.0);
+            for (int idx = 0; idx < nurbsSurface.KnotCount(1); idx++)
+                knotVectorV[idx + 1] = (nurbsSurface.Knot(1, idx) - nurbsSurface.SuperfluousKnot(1, false)) / (nurbsSurface.SuperfluousKnot(1, true) - nurbsSurface.SuperfluousKnot(1, false));
+            knotVectorV.append(1.0);
+        }
+        else
+        {
+            knotVectorV.append(nurbsSurface.SuperfluousKnot(1, false));
+            for (int idx = 0; idx < nurbsSurface.KnotCount(1); idx++)
+                knotVectorV[idx + 1] = nurbsSurface.Knot(1, idx);
+            knotVectorV.append(nurbsSurface.SuperfluousKnot(1, true));
+        }
         data["knotvector_v"] = knotVectorV;
 
         Json::Value controlPoints;
