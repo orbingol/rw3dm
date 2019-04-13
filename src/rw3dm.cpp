@@ -42,6 +42,9 @@ void extractCurveData(const ON_Geometry* geometry, Config &cfg, Json::Value &dat
     ON_NurbsCurve nurbsCurve;
     if (curve->NurbsCurve(&nurbsCurve))
     {
+        // Get dimension
+        data["dimension"] = nurbsCurve.Dimension();
+
         // Get rational
         data["rational"] = nurbsCurve.IsRational();
 
@@ -96,6 +99,9 @@ void extractSurfaceData(const ON_Geometry* geometry, Config &cfg, Json::Value &d
     ON_NurbsSurface nurbsSurface;
     if (surface->NurbsSurface(&nurbsSurface))
     {
+        // Get dimension
+        data["dimension"] = nurbsSurface.Dimension();
+
         // Get rational
         data["rational"] = nurbsSurface.IsRational();
 
