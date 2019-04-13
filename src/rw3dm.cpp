@@ -73,12 +73,11 @@ void extractCurveData(const ON_Geometry* geometry, Config &cfg, Json::Value &dat
         Json::Value points;
 
         // Get control points
-        int numCoords = nurbsCurve.IsRational() ? nurbsCurve.CVSize() - 1 : nurbsCurve.CVSize();
         for (int idx = 0; idx < nurbsCurve.CVCount(); idx++)
         {
             double *vertex = nurbsCurve.CV(idx);
             Json::Value point;
-            for (int c = 0; c < numCoords; c++)
+            for (int c = 0; c < nurbsCurve.Dimension(); c++)
                 point[c] = vertex[c];
             points[idx] = point;
         }
@@ -90,10 +89,7 @@ void extractCurveData(const ON_Geometry* geometry, Config &cfg, Json::Value &dat
             Json::Value weights;
             // Get weights
             for (int idx = 0; idx < nurbsCurve.CVCount(); idx++)
-            {
-                double *vertex = nurbsCurve.CV(idx);
-                weights[idx] = vertex[numCoords - 1];
-            }
+                weights[idx] = nurbsCurve.Weight(idx);
             controlPoints["weights"] = weights;
         }
         data["control_points"] = controlPoints;
@@ -158,7 +154,6 @@ void extractSurfaceData(const ON_Geometry* geometry, Config &cfg, Json::Value &d
         Json::Value points;
 
         // Get control points
-        int numCoords = nurbsSurface.IsRational() ? nurbsSurface.CVSize() - 1 : nurbsSurface.CVSize();
         int sizeU = nurbsSurface.CVCount(0);
         int sizeV = nurbsSurface.CVCount(1);
         for (int idxU = 0; idxU < sizeU; idxU++)
@@ -168,7 +163,7 @@ void extractSurfaceData(const ON_Geometry* geometry, Config &cfg, Json::Value &d
                 unsigned int idx = idxV + (idxU * sizeV);
                 double *vertex = nurbsSurface.CV(idxU, idxV);
                 Json::Value point;
-                for (int c = 0; c < numCoords; c++)
+                for (int c = 0; c < nurbsSurface.Dimension(); c++)
                     point[c] = vertex[c];
                 points[idx] = point;
             }
@@ -185,8 +180,7 @@ void extractSurfaceData(const ON_Geometry* geometry, Config &cfg, Json::Value &d
                 for (int idxV = 0; idxV < sizeV; idxV++)
                 {
                     unsigned int idx = idxV + (idxU * sizeV);
-                    double *vertex = nurbsSurface.CV(idxU, idxV);
-                    weights[idx] = vertex[numCoords - 1];
+                    weights[idx] = nurbsSurface.Weight(idxU, idxV);
                 }
             }
             controlPoints["weights"] = weights;
@@ -267,7 +261,7 @@ void constructCurveData(ONX_Model &model, Config &cfg, Json::Value &data)
     // Number of control points
     int numCtrlpts = data["control_points"]["points"].size();
 
-    // Create OpenNURBS curve instance
+    // Create a curve instance
     ON_NurbsCurve nurbsCurve(
         dimension,
         true,
@@ -318,7 +312,7 @@ void constructSurfaceData(ONX_Model &model, Config &cfg, Json::Value &data)
     int sizeU = data["size_u"].asInt();
     int sizeV = data["size_v"].asInt();
 
-    // Create OpenNURBS surface instance
+    // Create a surface instance
     ON_NurbsSurface nurbsSurface(
         dimension,
         true,
