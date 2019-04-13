@@ -282,16 +282,11 @@ void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data
 ON_ModelComponentReference
 constructCurveData(Json::Value &data, Config &cfg, ONX_Model &model)
 {
-    // Spatial dimension
-    int dimension = data["control_points"]["points"][0].size();
+    // Control points array
+    Json::Value ctrlpts = data["control_points"];
 
-    // Can only work with 2- and 3-dimensional curves
-    if (dimension > 3 || dimension < 2)
-    {
-        if (cfg.warnings())
-            std::cout << "[WARNING]: OpenNURBS supports 2- and 3-dimensional curves only. Skipping..." << std::endl;
-        return;
-    }
+    // Spatial dimension
+    int dimension = (data.isMember("dimension")) ? data["dimension"].asInt() : ctrlpts["points"][0].size();
  
     // Number of control points
     int numCtrlpts = data["control_points"]["points"].size();
@@ -299,7 +294,7 @@ constructCurveData(Json::Value &data, Config &cfg, ONX_Model &model)
     // Create a curve instance
     ON_NurbsCurve nurbsCurve(
         dimension,
-        true,
+        (data.isMember("rational")) ? data["rational"].asInt() : 1,
         data["degree"].asInt() + 1,
         numCtrlpts
     );
@@ -311,19 +306,11 @@ constructCurveData(Json::Value &data, Config &cfg, ONX_Model &model)
     // Set control points
     for (int idx = 0; idx < nurbsCurve.CVCount(); idx++)
     {
-        Json::Value cptData = data["control_points"]["points"][idx];
-        double w;
-        if (data["rational"] == 0)
-            w = 1.0;
-        else
-            w = data["control_points"]["weights"][idx].asDouble();
-        ON_4dPoint cpt(
-            cptData[0].asDouble() * w,
-            cptData[1].asDouble() * w,
-            (dimension == 2) ? 0.0 : cptData[2].asDouble() * w,
-            w
-        );
+        Json::Value cptData = ctrlpts["points"][idx];
+        ON_3dPoint cpt(cptData[0].asDouble(), cptData[1].asDouble(), (dimension == 2) ? 0.0 : cptData[2].asDouble());
         nurbsCurve.SetCV(idx, cpt);
+        if (ctrlpts.isMember("weights"))
+            nurbsCurve.SetWeight(idx, ctrlpts["weights"].asDouble());
     }
 
     // Add curve to the model
@@ -333,16 +320,11 @@ constructCurveData(Json::Value &data, Config &cfg, ONX_Model &model)
 ON_ModelComponentReference
 constructSurfaceData(Json::Value &data, Config &cfg, ONX_Model &model)
 {
-    // Spatial dimension
-    int dimension = data["control_points"]["points"][0].size();
+    // Control points array
+    Json::Value ctrlpts = data["control_points"];
 
-    // Can only work with 3-dimensional surfaces
-    if (dimension > 3 || dimension < 2)
-    {
-        if (cfg.warnings())
-            std::cout << "[WARNING]: OpenNURBS supports 3-dimensional surfaces only. Skipping..." << std::endl;
-        return;
-    }
+    // Spatial dimension
+    int dimension = (data.isMember("dimension")) ? data["dimension"].asInt() : ctrlpts["points"][0].size();
 
     // Number of control points
     int sizeU = data["size_u"].asInt();
@@ -351,7 +333,7 @@ constructSurfaceData(Json::Value &data, Config &cfg, ONX_Model &model)
     // Create a surface instance
     ON_NurbsSurface nurbsSurface(
         dimension,
-        true,
+        (data.isMember("rational")) ? data["rational"].asInt() : 1,
         data["degree_u"].asInt() + 1,
         data["degree_v"].asInt() + 1,
         sizeU,
@@ -370,24 +352,18 @@ constructSurfaceData(Json::Value &data, Config &cfg, ONX_Model &model)
         for (int idxV = 0; idxV < nurbsSurface.CVCount(1); idxV++)
         {
             unsigned int idx = idxV + (idxU * sizeV);
-            Json::Value cptData = data["control_points"]["points"][idx];
-            double w;
-            if (data["rational"] == 0)
-                w = 1.0;
-            else
-                w = data["control_points"]["weights"][idx].asDouble();
-            ON_4dPoint cpt(
-                cptData[0].asDouble() * w,
-                cptData[1].asDouble() * w,
-                cptData[2].asDouble() * w,
-                w
-            );
+            Json::Value cptData = ctrlpts["points"][idx];
+            ON_3dPoint cpt(cptData[0].asDouble(), cptData[1].asDouble(), cptData[2].asDouble());
             nurbsSurface.SetCV(idxU, idxV, cpt);
+            if (ctrlpts.isMember("weights"))
+                nurbsSurface.SetWeight(idxU, idxV, ctrlpts["weights"].asDouble());
         }
     }
 
     // Each surface (and the trim curves) should belong to a BRep object
     ON_Brep brep;
+
+    // Add surface to the BRep object
     brep.NewFace(nurbsSurface);
 
     // Add BRep to the model
