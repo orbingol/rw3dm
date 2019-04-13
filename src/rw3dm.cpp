@@ -239,7 +239,7 @@ void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data
     // Trim loop
     if (cfg.trims())
     {
-        Json::Value trimsData;
+        Json::Value trimCurvesData;
         unsigned int trimIdx = 0;
         unsigned int curveIdx = 0;
         ON_BrepTrim *brepTrim;
@@ -248,17 +248,34 @@ void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data
             const ON_Curve *trimCurve = brepTrim->TrimCurveOf();
             if (trimCurve)
             {
-                Json::Value trimCurveData;
-                extractCurveData(trimCurve, cfg, trimCurveData);
-                trimsData[curveIdx] = trimCurveData;
+                // Get surface domain for normalization of trimming curves
+                ON_Interval dom_u = brepTrim->SurfaceOf()->Domain(0);
+                ON_Interval dom_v = brepTrim->SurfaceOf()->Domain(1);
+
+                // Prepare parameter space offset and length
+                double paramOffset[2] = { dom_u.m_t[0], dom_v.m_t[0] };
+                double paramLength[2] = { dom_u.Length(), dom_v.Length() };
+
+                // Extract trim curve data
+                Json::Value curveData;
+                extractCurveData(trimCurve, cfg, curveData, paramOffset, paramLength);
+                curveData["type"] = "spline";
+                trimCurvesData[curveIdx] = curveData;
                 curveIdx++;
             }
             trimIdx++;
         }
 
-        // Because of the standardization, there should be 1 trim curve and 1 surface
-        if (trimsData.size() > 0)
-            data[0]["trims"] = trimsData;
+        // Because of the standardization, there should be 1 surface
+        if (trimCurvesData.size() > 0)
+        {
+            Json::Value trimData;
+            trimData["count"] = curveIdx;
+            trimData["data"] = trimCurvesData;
+
+            // Assign trims to the first surface
+            data[0]["trims"] = trimData;
+        }
     }
 }
 
