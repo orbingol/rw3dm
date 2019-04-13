@@ -14,12 +14,30 @@ set(CMAKE_INSTALL_PREFIX ${RW3DM_INSTALL_DIR})
 # Options
 set(RW3DM_BUILD_ON2JSON ON CACHE BOOL "Compile and install OpenNURBS to JSON converter")
 set(RW3DM_BUILD_JSON2ON ON CACHE BOOL "Compile and install JSON to OpenNURBS converter")
+set(RW3DM_BUILD_ON_DLL OFF CACHE BOOL "Dynamically link OpenNURBS library")
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 
+# Configure RPATH
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 # Add 3rd party libraries
 add_subdirectory(3rdparty)
+
+# Add compiler definitions
+if(RW3DM_BUILD_ON_DLL)
+  set(BUILD_COMP_DEFS
+    ${BUILD_COMP_DEFS}
+    -DOPENNURBS_IMPORTS  # OpenNURBS dynamic linking
+  )
+endif()
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  set(BUILD_COMP_DEFS
+    ${BUILD_COMP_DEFS}
+    -DON_CLANG_CONSTRUCTOR_BUG  # OpenNURBS fix for Linux compilation
+  )
+endif()
 
 if(RW3DM_BUILD_ON2JSON)
   # Set source files for ON2JSON
@@ -33,11 +51,9 @@ if(RW3DM_BUILD_ON2JSON)
 
   # Generate ON2JSON executable
   add_executable(on2json ${SOURCE_FILES_ON2JSON})
-  if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    target_compile_definitions(on2json
-      PRIVATE -DON_CLANG_CONSTRUCTOR_BUG
-    )
-  endif()
+  target_compile_definitions(on2json
+      PRIVATE ${BUILD_COMP_DEFS}
+  )
   target_link_libraries(on2json PRIVATE jsoncpp opennurbs)
   set_target_properties(on2json PROPERTIES DEBUG_POSTFIX "_d")
 
@@ -60,11 +76,9 @@ if(RW3DM_BUILD_JSON2ON)
 
   # Generate executable for JSON2ON
   add_executable(json2on ${SOURCE_FILES_JSON2ON})
-  if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    target_compile_definitions(json2on
-      PRIVATE -DON_CLANG_CONSTRUCTOR_BUG
-    )
-  endif()
+  target_compile_definitions(on2json
+      PRIVATE ${BUILD_COMP_DEFS}
+  )
   target_link_libraries(json2on PRIVATE jsoncpp opennurbs)
   set_target_properties(json2on PROPERTIES DEBUG_POSTFIX "_d")
 

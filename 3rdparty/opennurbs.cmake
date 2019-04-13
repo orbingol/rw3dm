@@ -7,6 +7,9 @@ set(ON_COMP_DIRECTIVES
   -DOPENNURBS_INPUT_LIBS_DIR="${CMAKE_CURRENT_BINARY_DIR}/$<CONFIGURATION>"
   -DOPENNURBS_ZLIB_LIB_DIR="${CMAKE_CURRENT_BINARY_DIR}/$<CONFIGURATION>"
   -DUNICODE
+  # zlib compiler directives
+  -DMY_ZCALLOC
+  -DZ_PREFIX
 )
 
 # Unfortunately, OpenNURBS does not like "WIN32" preprocessor definitions on x64
@@ -15,50 +18,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     string(REPLACE "/DWIN32" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
     set(ON_COMP_DIRECTIVES ${ON_COMP_DIRECTIVES} -DWIN64)
   endif()
-endif()
-
-# Additional compiler directives for Linux
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  set(ON_COMP_DIRECTIVES
-    ${ON_COMP_DIRECTIVES}
-    -DON_RUNTIME_LINUX
-    -DON_CLANG_CONSTRUCTOR_BUG
-  )
-endif()
-
-# Include zlib source
-file(GLOB ON_ZLIB_SRC "${CMAKE_CURRENT_LIST_DIR}/opennurbs/zlib/*.h" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/zlib/*.c")
-
-# Compile zlib as a static library on Windows
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-  add_library(zlib STATIC ${ON_ZLIB_SRC})
-  target_compile_definitions(zlib
-    PRIVATE -DMY_ZCALLOC
-    PRIVATE -DZ_PREFIX
-  )
-else()
-  # Add zlib compile definitions to the global definitions variable
-  set(ON_COMP_DIRECTIVES
-    ${ON_COMP_DIRECTIVES}
-    -DMY_ZCALLOC
-    -DZ_PREFIX
-  )
-endif()
-
-# Set link libraries for OpenNURBS
-set(ON_LINK_LIBS zlib)
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-  set(ON_LINK_LIBS ${ON_LINK_LIBS} shlwapi)
-# elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-else()
-  # Include UUID source
-  file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.c" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.skip")
-  file(GLOB ON_UUID_SRC "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/*.h" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/*.c")
-  file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.skip" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.c")
-
-  # # Compile UUID as a static library
-  # add_library(uuid STATIC ${ON_UUID_SRC})
-  # set(ON_LINK_LIBS ${ON_LINK_LIBS} uuid)
 endif()
 
 # Include OpenNURBS source
@@ -70,16 +29,56 @@ file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_gl.skip" "${CMAKE_CUR
 file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp932.skip" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp932.cpp")
 file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp949.skip" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp949.cpp")
 
-# Compile OpenNURBS as a static library
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-  add_library(opennurbs STATIC ${ON_SRC})
-  # Linking works on Windows
-  target_link_libraries(opennurbs PRIVATE ${ON_LINK_LIBS})
-else()
-  # All components are compiled into one binary on non-Windows
-  add_library(opennurbs STATIC ${ON_ZLIB_SRC} ${ON_UUID_SRC} ${ON_SRC})
+# Include zlib source
+file(GLOB ON_ZLIB_SRC "${CMAKE_CURRENT_LIST_DIR}/opennurbs/zlib/*.h" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/zlib/*.c")
+set(ON_SRC ${ON_ZLIB_SRC} ${ON_SRC})
+
+# Include UUID source
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  # Include UUID source for Linux
+  file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.c" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.skip")
+  file(GLOB ON_UUID_SRC "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/*.h" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/*.c")
+  file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.skip" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.c")
+  set(ON_SRC ${ON_UUID_SRC} ${ON_SRC})
+
+  # Additional compiler directives for Linux
+  set(ON_COMP_DIRECTIVES
+    ${ON_COMP_DIRECTIVES}
+    -DON_RUNTIME_LINUX
+    -DON_CLANG_CONSTRUCTOR_BUG
+  )
 endif()
+
+# Generate OpenNURBS library
+if(RW3DM_BUILD_ON_DLL)
+  # Generate a shared library
+  add_library(opennurbs SHARED ${ON_SRC})
+
+  # Update compiler directives
+  set(ON_COMP_DIRECTIVES
+    ${ON_COMP_DIRECTIVES}
+    -DOPENNURBS_EXPORTS
+  )
+
+  # Install OpenNURBS DLL
+  install(
+    TARGETS opennurbs
+    DESTINATION ${RW3DM_INSTALL_DIR}
+  )
+else()
+  # Generate a static library
+  add_library(opennurbs STATIC ${ON_SRC})
+endif()
+
+# shlwapi only required for Windows
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  target_link_libraries(opennurbs PRIVATE shlwapi)
+endif()
+
+# Add compiler definitions for OpenNURBS
 target_compile_definitions(opennurbs
   PRIVATE ${ON_COMP_DIRECTIVES}
 )
+
+# Add OpenNURBS source directory to the global includes
 target_include_directories(opennurbs PUBLIC "${CMAKE_CURRENT_LIST_DIR}/opennurbs")
