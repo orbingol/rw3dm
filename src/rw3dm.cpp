@@ -33,7 +33,7 @@ void finalizeRwExt()
     ON::End();
 }
 
-void extractCurveData(const ON_Geometry* geometry, Config &cfg, Json::Value &data)
+void extractCurveData(const ON_Geometry* geometry, Config &cfg, Json::Value &data, double *paramOffset, double *paramLength)
 {
     // We know that "geometry" is a curve object
     const ON_Curve *curve = (ON_Curve *)geometry;
@@ -82,7 +82,12 @@ void extractCurveData(const ON_Geometry* geometry, Config &cfg, Json::Value &dat
             double *vertex = nurbsCurve.CV(idx);
             Json::Value point;
             for (int c = 0; c < nurbsCurve.Dimension(); c++)
-                point[c] = vertex[c];
+            {
+                if (paramOffset != nullptr && paramLength != nullptr && cfg.normalize())
+                    point[c] = (vertex[c] - paramOffset[c]) / paramLength[c];
+                else
+                    point[c] = vertex[c];
+            }
             points[idx] = point;
         }
         controlPoints["points"] = points;
