@@ -245,6 +245,8 @@ void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data
             // Only add to the array if JSON output is not empty
             if (!surfData.empty())
             {
+                if (cfg.sense())
+                    surfData["reversed"] = brepFace->m_bRev;
                 data[surfIdx] = surfData;
                 surfIdx++;
             }
@@ -278,6 +280,8 @@ void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data
                 // Only add to the array if JSON output is not empty
                 if (!curveData.empty())
                 {
+                    if (cfg.sense())
+                        curveData["reversed"] = brepTrim->m_bRev3d;
                     curveData["type"] = "spline";
                     trimCurvesData[curveIdx] = curveData;
                     curveIdx++;
@@ -402,7 +406,19 @@ constructSurfaceData(Json::Value &data, Config &cfg, ONX_Model &model)
                 ON_Geometry *trimGeom = trimGeomComp->ExclusiveGeometry();
                 ON_Curve *trimCurve = ON_Curve::Cast(trimGeom);
                 // Add trim curve to the BRep object
-                brep.AddTrimCurve(trimCurve);
+                int trimIdx = brep.AddTrimCurve(trimCurve);
+                // If trim is valid, add trim sense, i.e. trim direction w.r.t. the face
+                if (trimIdx > -1)
+                {
+                    ON_BrepTrim *brepTrim = brep.Trim(trimIdx);
+                    if (brepTrim)
+                    {
+                        if (trim.isMember("reversed"))
+                            brepTrim->m_bRev3d = trim["reversed"].asBool();
+                        else
+                            brepTrim->m_bRev3d = true;  // trim inside the curve
+                    }
+                }
             }
         }
     }
