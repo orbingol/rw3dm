@@ -20,15 +20,20 @@ file(GLOB ON_SRC "${CMAKE_CURRENT_LIST_DIR}/opennurbs/*.h" "${CMAKE_CURRENT_LIST
 file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_gl.skip" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_gl.cpp")
 file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp932.skip" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp932.cpp")
 file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp949.skip" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp949.cpp")
+set(ON_SRC_ALL ${ON_SRC})
 
 # zlib source (included with OpenNURBS)
 file(GLOB ON_ZLIB_SRC "${CMAKE_CURRENT_LIST_DIR}/opennurbs/zlib/*.h" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/zlib/*.c")
 
 # Generate zlib as a static library
-add_library(zlib STATIC ${ON_ZLIB_SRC})
-
-# Add zlib to the link libraries
-set(ON_LINK_LIBRARIES zlib)
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  add_library(zlib STATIC ${ON_ZLIB_SRC})
+  target_compile_definitions(zlib
+    PRIVATE -DMY_ZCALLOC -DZ_PREFIX
+  )
+  # Add zlib to the link libraries
+  set(ON_LINK_LIBRARIES zlib)
+endif()
 
 # OpenNURBS fixes for Windows
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
@@ -49,12 +54,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   file(GLOB ON_UUID_SRC "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/*.h" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/*.c")
   file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.skip" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.c")
 
-  # Generate uuid as a static library
-  add_library(uuid STATIC ${ON_UUID_SRC})
-
-  # Add uuid to the link libraries
-  set(ON_LINK_LIBRARIES ${ON_LINK_LIBRARIES} uuid)
-
   # Update compiler directives
   set(ON_COMP_DIRECTIVES
     ${ON_COMP_DIRECTIVES}
@@ -65,6 +64,11 @@ endif()
 
 # Generate OpenNURBS library
 if(RW3DM_BUILD_ON_DLL)
+  # Cannot compile OpenNURBS as a shared library on Linux
+  if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    message(FATAL_ERROR "OpenNURBS shared library generation is not supported on Linux")
+  endif()
+
   # Generate a shared library
   add_library(opennurbs SHARED ${ON_SRC})
 
@@ -81,11 +85,18 @@ if(RW3DM_BUILD_ON_DLL)
   )
 else()
   # Generate a static library
-  add_library(opennurbs STATIC ${ON_SRC})
+  if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    add_library(opennurbs STATIC ${ON_SRC})
+  else()
+    # Need to combine all source files for static linking on Linux
+    add_library(opennurbs STATIC ${ON_UUID_SRC} ${ON_ZLIB_SRC} ${ON_SRC})
+  endif()
 endif()
 
-# Link OpenNURBS library
-target_link_libraries(opennurbs PRIVATE ${ON_LINK_LIBRARIES})
+# Link OpenNURBS library (only Windows)
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  target_link_libraries(opennurbs PRIVATE ${ON_LINK_LIBRARIES})
+endif()
 
 # Add compiler definitions for OpenNURBS
 target_compile_definitions(opennurbs
