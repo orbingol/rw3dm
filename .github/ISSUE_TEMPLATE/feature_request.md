@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea for rw3dm
+about: Suggest an idea for the rw3dm project
 title: ''
 labels: enhancement
 assignees: ''
