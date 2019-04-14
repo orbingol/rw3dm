@@ -42,7 +42,7 @@ struct Config {
     std::map< std::string, std::pair<std::string, std::string> > params = {
         { "show_config", { "0", "Prints the configuration" } },
         { "warnings", { "0", "Enable warnings" } },
-        { "normalize", { "1", "Normalize knot vectors and rescale trim curves" } },
+        { "normalize", { "1", "Normalize knot vectors and scale trim curves to [0,1] domain" } },
         { "trims", { "1", "Extract trim curves" } },
         { "extract_curves", { "0", "Extract curves (Default is extract surfaces)" } }
     };
