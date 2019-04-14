@@ -19,9 +19,6 @@ set(RW3DM_BUILD_ON_DLL OFF CACHE BOOL "Dynamically link OpenNURBS library")
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 
-# Configure RPATH
-SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
 # Add 3rd party libraries
 add_subdirectory(3rdparty)
 
