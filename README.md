@@ -2,8 +2,8 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/gdawoy927oeex1dj?svg=true)](https://ci.appveyor.com/project/orbingol/rw3dm)
 
-RW3DM is a Python module for extracting NURBS curves and surfaces from OpenNURBS/Rhino .3DM files. It uses
-[OpenNURBS](https://github.com/mcneel/opennurbs) library for reading and writing .3DM files
+RW3DM project provides executables for exporting and importing OpenNURBS/Rhino .3DM files in JSON format.
+It utilizes [OpenNURBS](https://github.com/mcneel/opennurbs) library for reading and writing .3DM files
 and [JsonCpp](https://github.com/open-source-parsers/jsoncpp) for importing and exporting
 [geomdl](https://github.com/orbingol/NURBS-Python) geometry data.
 
@@ -45,7 +45,7 @@ If you prefer to update the compiled binaries on your own, you can follow the fo
 #### For Windows
 
 * Visual Studio 2017 is required to compile OpenNURBS
-* Please install C++ support on Visual Studio as it not installed by default
+* Please install C++ support on Visual Studio as it is not installed by default
 * Choose **Release** as the build configuration inside Visual Studio before you compile the module
 
 #### For Linux
