@@ -12,12 +12,11 @@ version: Build {build}
 # Initialize CI
 init:
   - set arch=
-  - if "%PYTHON_ARCH%"=="64" ( set arch= Win64)
+  - if "%CMAKE_ARCH%"=="64" ( set arch= Win64)
   - echo %arch%
   - echo %APPVEYOR_BUILD_WORKER_IMAGE%
   - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" ( set generator="Visual Studio 15 2017%arch%" )
   - echo %generator%
-  - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
 
 # Clone with submodules
 clone_script:
@@ -38,34 +37,20 @@ pull_requests:
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      PYTHON: "C:\\Python35"
-      PYTHON_ARCH: "32"
-      PYTHON_LIB: "C:\\Python35\\libs\\python35.lib"
+      CMAKE_ARCH: "32"
+      CMAKE_ARGS: -DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=ON
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      PYTHON: "C:\\Python36"
-      PYTHON_ARCH: "32"
-      PYTHON_LIB: "C:\\Python36\\libs\\python36.lib"
+      CMAKE_ARCH: "32"
+      CMAKE_ARGS: -DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=OFF
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      PYTHON: "C:\\Python37"
-      PYTHON_ARCH: "32"
-      PYTHON_LIB: "C:\\Python37\\libs\\python37.lib"
+      CMAKE_ARCH: "64"
+      CMAKE_ARGS: -DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=ON
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      PYTHON: "C:\\Python35-x64"
-      PYTHON_ARCH: "64"
-      PYTHON_LIB: "C:\\Python35-x64\\libs\\python35.lib"
-
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      PYTHON: "C:\\Python36-x64"
-      PYTHON_ARCH: "64"
-      PYTHON_LIB: "C:\\Python36-x64\\libs\\python36.lib"
-
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      PYTHON: "C:\\Python37-x64"
-      PYTHON_ARCH: "64"
-      PYTHON_LIB: "C:\\Python37-x64\\libs\\python37.lib"
+      CMAKE_ARCH: "64"
+      CMAKE_ARGS: -DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=OFF
 
 # Install required packages before the build
 install:
@@ -79,43 +64,22 @@ install:
         Where-Object pullRequestId -eq $env:APPVEYOR_PULL_REQUEST_NUMBER)[0].buildNumber) { `
           throw "There are newer queued builds for this pull request, failing early." }
 
-  # Print Python version
-  - cmd: python -c "import sys; print(sys.version)"
-
-  # Upgrade to the latest version of pip to avoid it displaying warnings about it being out of date.
-  - cmd: python -m pip install --disable-pip-version-check --upgrade pip
-
-  # Upgrade setuptools and wheel
-  - cmd: python -m pip install --upgrade setuptools wheel
-
 # Generate Visual Studio solution files
 before_build:
   - cmd: mkdir build
   - cmd: cd build
   - cmd: cmake --version
-  - cmd: cmake .. -G %generator% -DPYTHON_INCLUDE_DIR=%PYTHON%\\include -DPYTHON_LIBRARY=%PYTHON_LIB%
+  - cmd: cmake .. -G %generator% %CMAKE_ARGS%
 
 # Compile the package
 build_script:
-  - cmd: cmake --build . --config Release --target rw3dm
+  - cmd: cmake --build . --config Release --target on2json
+  - cmd: cmake --build . --config Release --target json2on
 
 # Install the package
 after_build:
   - cmd: cmake --build . --config Release --target install
-  - cmd: cd install
-
-# Install the package to the site-packages directory
-before_test:
-  - cmd: python -m pip install .
-
-# Test Python import
-test_script:
-  - cmd: python -c "import rw3dm; print(rw3dm.__version__)"
-
-# Build the wheel after test
-after_test:
-  - cmd: python setup.py bdist_wheel
 
 # Push binary wheels as artifacts
 artifacts:
-  - path: build\install\dist\*
+  - path: build\install\*
