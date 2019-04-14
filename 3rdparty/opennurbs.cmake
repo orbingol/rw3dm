@@ -71,6 +71,7 @@ if(RW3DM_BUILD_ON_DLL)
 
   # Generate a shared library
   add_library(opennurbs SHARED ${ON_SRC})
+  set_target_properties(opennurbs PROPERTIES DEBUG_POSTFIX "d")
 
   # Update compiler directives
   set(ON_COMP_DIRECTIVES

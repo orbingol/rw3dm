@@ -55,7 +55,7 @@ if(RW3DM_BUILD_ON2JSON)
       PRIVATE ${BUILD_COMP_DEFS}
   )
   target_link_libraries(on2json PRIVATE jsoncpp opennurbs)
-  set_target_properties(on2json PROPERTIES DEBUG_POSTFIX "_d")
+  set_target_properties(on2json PROPERTIES DEBUG_POSTFIX "d")
 
   # Install the ON2JSON binary
   install(
@@ -80,7 +80,7 @@ if(RW3DM_BUILD_JSON2ON)
       PRIVATE ${BUILD_COMP_DEFS}
   )
   target_link_libraries(json2on PRIVATE jsoncpp opennurbs)
-  set_target_properties(json2on PROPERTIES DEBUG_POSTFIX "_d")
+  set_target_properties(json2on PROPERTIES DEBUG_POSTFIX "d")
 
   # Install the JSON2ON binary
   install(
