@@ -44,6 +44,7 @@ struct Config {
         { "warnings", { "0", "Enable warnings" } },
         { "normalize", { "1", "Normalize knot vectors and scale trim curves to [0,1] domain" } },
         { "trims", { "1", "Extract trim curves" } },
+        { "sense", { "1", "Extract surface and trim curve direction w.r.t. the face" } },
         { "extract_curves", { "0", "Extract curves (Default is extract surfaces)" } }
     };
 
@@ -52,6 +53,7 @@ struct Config {
     bool warnings();
     bool normalize();
     bool trims();
+    bool sense();
     bool extract_curves();
 };
 

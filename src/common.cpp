@@ -43,6 +43,11 @@ bool Config::trims()
     return bool(std::atoi(params.at("trims").first.c_str()));
 }
 
+bool Config::sense()
+{
+    return bool(std::atoi(params.at("sense").first.c_str())); 
+}
+
 bool Config::extract_curves()
 {
     return bool(std::atoi(params.at("extract_curves").first.c_str()));
