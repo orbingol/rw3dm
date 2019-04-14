@@ -2,12 +2,18 @@
 
 RW3DM is a Python module for extracting NURBS curves and surfaces from OpenNURBS/Rhino .3DM files. It uses
 [OpenNURBS](https://github.com/mcneel/opennurbs) library for reading and writing .3DM files
-and [pybind11](https://github.com/pybind/pybind11) to generate Python wrappers for the reading
-and writing functions.
+and [JsonCpp](https://github.com/open-source-parsers/jsoncpp) for importing and exporting
+[geomdl](https://github.com/orbingol/NURBS-Python) geometry data.
 
-## Installing & updating RW3DM
+## Installation and Updating RW3DM
 
-### Installing RW3DM
+### Downloading binaries
+
+You can download the precompiled binaries under [Releases](https://github.com/orbingol/rw3dm/releases).
+
+### Compiling RW3DM
+
+If you prefer to compile the binaries on your own, you can follow the following list as a reference:
 
 1. Clone the repository: `git clone https://github.com/orbingol/rw3dm.git`
 2. Change to the directory of the local repository: `cd rw3dm`
@@ -19,14 +25,14 @@ and writing functions.
  * For Windows, you will find the Visual Studio project files under `build` directory.
  * After opening Visual Studio, choose `Release` from the build combobox, then right click on `INSTALL` and choose `Rebuild`
  * For Linux, run `make install` inside the `build` directory
- * The install directory will be `build/install` by default.
- * You can modify the install directory using `RW3DM_INSTALL_PREFIX` variable while configuring the project with CMake
-8. Go to the install directory, e.g. `cd install` or the one you configured with CMake during step 6.
-9. Run: `python setup.py install`
- * Please note that on Linux systems, there will be `python2` and `python3`. `python` might be linked to one of these.
- * Please use the Python version that you linked the module. Otherwise, you will encounter import errors.
+ * The install directory will be `build/install` by default
+ * You can modify the install directory using `RW3DM_INSTALL_DIR` variable while configuring the project with CMake
+8. Go to the install directory, e.g. `cd install` or the one you configured with CMake during step 6
+9. You will find the executables inside the install directory
 
 ### Updating RW3DM
+
+If you prefer to update the compiled binaries on your own, you can follow the following list as a reference:
 
 1. Pull the latest commits: `git pull --rebase`
 2. Update submodules: `git submodule update`
@@ -34,38 +40,28 @@ and writing functions.
 
 ### Notes on installing and updating
 
-#### General information
-
-* The minimum CMake version required is 3.8. Please visit [cmake.org](https://cmake.org/) to download the binary for your operating system.
-* Please make sure that you are compiling against the correct Python library versions (mixing versions can cause some issues)
-
 #### For Windows
 
-* Visual Studio 2017 is required to compile OpenNURBS and pybind11 modules
-* Don't forget to install C++ support on Visual Studio (not installed by default)
-* It is also possible to use MSBuild (CMake detects it as Visual Studio)
-* Visual Studio 32-bit and 64-bit are processed differently in CMake and it should be selected with respect to the Python architecture that you are using. You can find your Python architecture by typing:
-
-`python -c "import platform; print(platform.architecture()[0])"`
-
+* Visual Studio 2017 is required to compile OpenNURBS
+* Please install C++ support on Visual Studio as it not installed by default
 * Choose **Release** as the build configuration inside Visual Studio before you compile the module
-* In case of any import errors, check build configuration and compiler architecture again to make sure that they were correctly selected
 
-#### For Ubuntu 18.04
+#### For Linux
 
-* It is tested with gcc 7.3
-* Don't forget to install the compiler packages: `apt install build-essential`
-* You might also need to install the Python development libraries
+* It is tested with gcc 7.3 and it should be compatible with any gcc version supporting C++17
+* Please remember to install the compiler packages for your Linux distribution
 
 ## Using RW3DM
 
 ### Reading .3DM files
 
-
+`on2json` executable can be used to convert .3DM files to JSON format supported by [geomdl](https://github.com/orbingol/NURBS-Python).
+The JSON files can be imported via [geomdl](https://github.com/orbingol/NURBS-Python)'s `exchange.import_json` API call.
 
 ### Writing .3DM files
 
-
+`json2on` executable can be used to convert JSON format supported by [geomdl](https://github.com/orbingol/NURBS-Python) to .3DM files.
+The JSON files can be exported via [geomdl](https://github.com/orbingol/NURBS-Python)'s `exchange.export_json` API call.
 
 ## Author
 
