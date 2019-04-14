@@ -35,6 +35,10 @@ void finalizeRwExt()
 
 void extractCurveData(const ON_Geometry* geometry, Config &cfg, Json::Value &data, double *paramOffset, double *paramLength)
 {
+    // We expect a curve object
+    if (ON::object_type::curve_object != geometry->ObjectType())
+        return;
+
     // We know that "geometry" is a curve object
     const ON_Curve *curve = (ON_Curve *)geometry;
 
@@ -107,6 +111,10 @@ void extractCurveData(const ON_Geometry* geometry, Config &cfg, Json::Value &dat
 
 void extractSurfaceData(const ON_Geometry* geometry, Config &cfg, Json::Value &data)
 {
+    // We expect a surface object
+    if (ON::object_type::surface_object != geometry->ObjectType())
+        return;
+
     // We know that "geometry" is a surface object
     const ON_Surface *surface = (ON_Surface *)geometry;
 
@@ -210,6 +218,10 @@ void extractSurfaceData(const ON_Geometry* geometry, Config &cfg, Json::Value &d
 
 void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data)
 {
+    // We expect a BRep object
+    if (ON::object_type::brep_object != geometry->ObjectType())
+        return;
+
     // We know that "geometry" is a BRep object
     ON_Brep *brep = (ON_Brep *)geometry;
 
@@ -230,8 +242,12 @@ void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data
         {
             Json::Value surfData;
             extractSurfaceData(faceSurf, cfg, surfData);
-            data[surfIdx] = surfData;
-            surfIdx++;
+            // Only add to the array if JSON output is not empty
+            if (!surfData.empty())
+            {
+                data[surfIdx] = surfData;
+                surfIdx++;
+            }
         }
         faceIdx++;
     }
@@ -259,9 +275,13 @@ void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data
                 // Extract trim curve data
                 Json::Value curveData;
                 extractCurveData(trimCurve, cfg, curveData, paramOffset, paramLength);
-                curveData["type"] = "spline";
-                trimCurvesData[curveIdx] = curveData;
-                curveIdx++;
+                // Only add to the array if JSON output is not empty
+                if (!curveData.empty())
+                {
+                    curveData["type"] = "spline";
+                    trimCurvesData[curveIdx] = curveData;
+                    curveIdx++;
+                }
             }
             trimIdx++;
         }

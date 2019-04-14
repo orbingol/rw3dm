@@ -129,8 +129,12 @@ int main(int argc, char **argv)
                         break;
                     }
                 }
-                dataDef[modelCount] = data;
-                modelCount++;
+                // Only add to the array if JSON output is not empty
+                if (!data.empty())
+                {
+                    dataDef[modelCount] = data;
+                    modelCount++;
+                }
             }
         }
     }
