@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Please report bugs for rw3dm module
+about: Report bugs for the rw3dm project
 title: ''
 labels: bug
 assignees: ''
@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **Describe the bug**
-A clear and concise description of what the bug is.
+A clear description of what the bug is.
 
 **To Reproduce**
 Steps to reproduce the behavior:
@@ -24,12 +24,10 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Configuration:**
- - Operating system:
- - Python distribution: (e.g. python.org, Anaconda, etc.)
- - Python version: (e.g. v3.7.1)
- - CMake version:
+ - Operating system (e.g. Ubuntu 18.04):
+ - CMake version (e.g. 3.8.2):
  - Compiler: (e.g. Visual Studio 2017)
- - Additional software used (if applicable) 
+ - Additional software used (if applicable): 
 
 **Additional context**
 Add any other context about the problem here.
