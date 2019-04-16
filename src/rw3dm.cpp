@@ -244,90 +244,93 @@ void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data
             // Only add to the array if JSON output is not empty
             if (!surfData.empty())
             {
+                // Add face sense
                 if (cfg.sense())
                     surfData["reversed"] = brepFace->m_bRev;
+
+                // Process trims
+                if (cfg.trims())
+                {
+                    Json::Value trimCurvesData;
+                    unsigned int loopIdx = 0;
+                    ON_BrepLoop *brepLoop;
+
+                    // Use loops to get trim information
+                    while (brepLoop = brepFace->Loop(loopIdx))
+                    {
+                        Json::Value trimLoopData;
+                        unsigned int trimIdx = 0;
+                        ON_BrepTrim *brepTrim;
+
+                        // Extract the trim inside the loop
+                        while (brepTrim = brepLoop->Trim(trimIdx))
+                        {
+                            // Try to get the trim curve from the BRep structure
+                            const ON_Curve *trimCurve = brepTrim->TrimCurveOf();
+                            if (trimCurve)
+                            {
+                                // Get surface domain for normalization of trimming curves
+                                ON_Interval dom_u = brepTrim->SurfaceOf()->Domain(0);
+                                ON_Interval dom_v = brepTrim->SurfaceOf()->Domain(1);
+
+                                // Prepare parameter space offset and length
+                                double paramOffset[2] = { dom_u.m_t[0], dom_v.m_t[0] };
+                                double paramLength[2] = { dom_u.Length(), dom_v.Length() };
+
+                                // Extract trim curve data
+                                Json::Value curveData;
+                                extractCurveData(trimCurve, cfg, curveData, paramOffset, paramLength);
+
+                                // Only add to the array if JSON output is not empty
+                                if (!curveData.empty())
+                                {
+                                    if (cfg.sense())
+                                        curveData["reversed"] = brepTrim->m_bRev3d;
+                                    curveData["type"] = "spline";
+                                    trimLoopData.append(curveData);
+                                }
+                            }
+
+                            // Increment trim traversing index
+                            trimIdx++;
+                        }
+
+                        // Create a container type trim
+                        if (trimLoopData.size() > 0)
+                        {
+                            Json::Value trimData;
+                            trimData["type"] = "container";
+                            trimData["data"] = trimLoopData;
+                            // Detect the sense
+                            trimData["reversed"] = (brepLoop->m_type == ON_BrepLoop::TYPE::outer) ? false : true;
+
+                            // Add trim container to the JSON array
+                            trimCurvesData.append(trimData);
+                        }
+
+                        // Increment loop traversing index
+                        loopIdx++;
+                    }
+
+                    // Due to the standardization, there should be 1 surface
+                    if (trimCurvesData.size() > 0)
+                    {
+                        Json::Value trimData;
+                        trimData["count"] = trimCurvesData.size();
+                        trimData["data"] = trimCurvesData;
+
+                        // Assign trims to the first surface
+                        surfData["trims"] = trimData;
+                    }
+                }
+
+                // Add extracted surface to the JSON array
                 data.append(surfData);
             }
         }
 
         // Increment face traversing index
         faceIdx++;
-    }
-
-    // Trim loop
-    if (cfg.trims())
-    {
-        Json::Value trimCurvesData;
-        unsigned int loopIdx = 0;
-        ON_BrepLoop *brepLoop;
-
-        // Use loops to get trim information
-        while (brepLoop = brep->m_L.At(loopIdx))
-        {
-            Json::Value trimLoopData;
-            unsigned int trimIdx = 0;
-            ON_BrepTrim *brepTrim;
-
-            // Extract the trim inside the loop
-            while (brepTrim = brepLoop->Trim(trimIdx))
-            {
-                // Try to get the trim curve from the BRep structure
-                const ON_Curve *trimCurve = brepTrim->TrimCurveOf();
-                if (trimCurve)
-                {
-                    // Get surface domain for normalization of trimming curves
-                    ON_Interval dom_u = brepTrim->SurfaceOf()->Domain(0);
-                    ON_Interval dom_v = brepTrim->SurfaceOf()->Domain(1);
-
-                    // Prepare parameter space offset and length
-                    double paramOffset[2] = { dom_u.m_t[0], dom_v.m_t[0] };
-                    double paramLength[2] = { dom_u.Length(), dom_v.Length() };
-
-                    // Extract trim curve data
-                    Json::Value curveData;
-                    extractCurveData(trimCurve, cfg, curveData, paramOffset, paramLength);
-
-                    // Only add to the array if JSON output is not empty
-                    if (!curveData.empty())
-                    {
-                        if (cfg.sense())
-                            curveData["reversed"] = brepTrim->m_bRev3d;
-                        curveData["type"] = "spline";
-                        trimLoopData.append(curveData);
-                    }
-                }
-
-                // Increment trim traversing index
-                trimIdx++;
-            }
-
-            // Create a container type trim
-            if (trimLoopData.size() > 0)
-            {
-                Json::Value trimData;
-                trimData["type"] = "container";
-                trimData["data"] = trimLoopData;
-                // Detect the sense
-                trimData["reversed"] = (brepLoop->m_type == ON_BrepLoop::TYPE::outer) ? false : true;
-
-                // Add trim container to the JSON array
-                trimCurvesData.append(trimData);
-            }
-
-            // Increment loop traversing index
-            loopIdx++;
-        }
-
-        // Due to the standardization, there should be 1 surface
-        if (trimCurvesData.size() > 0)
-        {
-            Json::Value trimData;
-            trimData["count"] = trimCurvesData.size();
-            trimData["data"] = trimCurvesData;
-
-            // Assign trims to the first surface
-            data[0]["trims"] = trimData;
-        }
     }
 }
 
