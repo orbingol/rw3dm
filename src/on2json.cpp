@@ -132,8 +132,19 @@ int main(int argc, char **argv)
                 // Only add to the array if JSON output is not empty
                 if (!data.empty())
                 {
-                    dataDef[modelCount] = data;
-                    modelCount++;
+                    if (data.isArray())
+                    {
+                        for (auto d : data)
+                        {
+                            dataDef[modelCount] = d;
+                            modelCount++;
+                        }
+                    }
+                    else
+                    {
+                        dataDef[modelCount] = data;
+                        modelCount++;
+                    }
                 }
             }
         }
