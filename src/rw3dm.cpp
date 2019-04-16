@@ -258,43 +258,71 @@ void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data
     if (cfg.trims())
     {
         Json::Value trimCurvesData;
-        unsigned int trimIdx = 0;
-        unsigned int curveIdx = 0;
-        ON_BrepTrim *brepTrim;
-        while (brepTrim = brep->m_T.At(trimIdx))
+        unsigned int loopIdx = 0;
+        ON_BrepLoop *brepLoop;
+
+        // Use loops to get trim information
+        while (brepLoop = brep->m_L.At(loopIdx))
         {
-            const ON_Curve *trimCurve = brepTrim->TrimCurveOf();
-            if (trimCurve)
+            Json::Value trimLoopData;
+            unsigned int trimIdx = 0;
+            ON_BrepTrim *brepTrim;
+
+            // Extract the trim inside the loop
+            while (brepTrim = brepLoop->Trim(trimIdx))
             {
-                // Get surface domain for normalization of trimming curves
-                ON_Interval dom_u = brepTrim->SurfaceOf()->Domain(0);
-                ON_Interval dom_v = brepTrim->SurfaceOf()->Domain(1);
-
-                // Prepare parameter space offset and length
-                double paramOffset[2] = { dom_u.m_t[0], dom_v.m_t[0] };
-                double paramLength[2] = { dom_u.Length(), dom_v.Length() };
-
-                // Extract trim curve data
-                Json::Value curveData;
-                extractCurveData(trimCurve, cfg, curveData, paramOffset, paramLength);
-                // Only add to the array if JSON output is not empty
-                if (!curveData.empty())
+                // Try to get the trim curve from the BRep structure
+                const ON_Curve *trimCurve = brepTrim->TrimCurveOf();
+                if (trimCurve)
                 {
-                    if (cfg.sense())
-                        curveData["reversed"] = brepTrim->m_bRev3d;
-                    curveData["type"] = "spline";
-                    trimCurvesData[curveIdx] = curveData;
-                    curveIdx++;
+                    // Get surface domain for normalization of trimming curves
+                    ON_Interval dom_u = brepTrim->SurfaceOf()->Domain(0);
+                    ON_Interval dom_v = brepTrim->SurfaceOf()->Domain(1);
+
+                    // Prepare parameter space offset and length
+                    double paramOffset[2] = { dom_u.m_t[0], dom_v.m_t[0] };
+                    double paramLength[2] = { dom_u.Length(), dom_v.Length() };
+
+                    // Extract trim curve data
+                    Json::Value curveData;
+                    extractCurveData(trimCurve, cfg, curveData, paramOffset, paramLength);
+
+                    // Only add to the array if JSON output is not empty
+                    if (!curveData.empty())
+                    {
+                        if (cfg.sense())
+                            curveData["reversed"] = brepTrim->m_bRev3d;
+                        curveData["type"] = "spline";
+                        trimLoopData.append(curveData);
+                    }
                 }
+
+                // Increment trim traversing index
+                trimIdx++;
             }
-            trimIdx++;
+
+            // Create a container type trim
+            if (trimLoopData.size() > 0)
+            {
+                Json::Value trimData;
+                trimData["type"] = "container";
+                trimData["data"] = trimLoopData;
+                // Detect the sense
+                trimData["reversed"] = (brepLoop->m_type == ON_BrepLoop::TYPE::outer) ? false : true;
+
+                // Add trims to the JSON object
+                trimCurvesData.append(trimData);
+            }
+
+            // Increment BRep loop traversing index
+            loopIdx++;
         }
 
-        // Because of the standardization, there should be 1 surface
+        // Due to the standardization, there should be 1 surface
         if (trimCurvesData.size() > 0)
         {
             Json::Value trimData;
-            trimData["count"] = curveIdx;
+            trimData["count"] = trimCurvesData.size();
             trimData["data"] = trimCurvesData;
 
             // Assign trims to the first surface
