@@ -233,7 +233,6 @@ void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data
 
     // Face loop
     unsigned int faceIdx = 0;
-    unsigned int surfIdx = 0;
     ON_BrepFace *brepFace;
     while (brepFace = brep->Face(faceIdx))
     {
@@ -247,10 +246,11 @@ void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data
             {
                 if (cfg.sense())
                     surfData["reversed"] = brepFace->m_bRev;
-                data[surfIdx] = surfData;
-                surfIdx++;
+                data.append(surfData);
             }
         }
+
+        // Increment face traversing index
         faceIdx++;
     }
 
@@ -310,11 +310,11 @@ void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data
                 // Detect the sense
                 trimData["reversed"] = (brepLoop->m_type == ON_BrepLoop::TYPE::outer) ? false : true;
 
-                // Add trims to the JSON object
+                // Add trim container to the JSON array
                 trimCurvesData.append(trimData);
             }
 
-            // Increment BRep loop traversing index
+            // Increment loop traversing index
             loopIdx++;
         }
 
