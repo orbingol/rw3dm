@@ -246,7 +246,7 @@ void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data
             {
                 // Add face sense
                 if (cfg.sense())
-                    surfData["reversed"] = brepFace->m_bRev;
+                    surfData["reversed"] = !brepFace->m_bRev;
 
                 // Process trims
                 if (cfg.trims())
@@ -285,7 +285,7 @@ void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data
                                 if (!curveData.empty())
                                 {
                                     if (cfg.sense())
-                                        curveData["reversed"] = brepTrim->m_bRev3d;
+                                        curveData["reversed"] = !brepTrim->m_bRev3d;
                                     curveData["type"] = "spline";
                                     trimLoopData.append(curveData);
                                 }
@@ -302,7 +302,7 @@ void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data
                             trimData["type"] = "container";
                             trimData["data"] = trimLoopData;
                             // Detect the sense
-                            trimData["reversed"] = (brepLoop->m_type == ON_BrepLoop::TYPE::outer) ? false : true;
+                            trimData["reversed"] = (brepLoop->m_type == ON_BrepLoop::TYPE::outer) ? true : false;
 
                             // Add trim container to the JSON array
                             trimCurvesData.append(trimData);
