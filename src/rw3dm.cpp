@@ -261,7 +261,7 @@ void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data
         unsigned int trimIdx = 0;
         unsigned int curveIdx = 0;
         ON_BrepTrim *brepTrim;
-        while (brepTrim = brep->Trim(trimIdx))
+        while (brepTrim = brep->m_T.At(trimIdx))
         {
             const ON_Curve *trimCurve = brepTrim->TrimCurveOf();
             if (trimCurve)
