@@ -16,6 +16,9 @@ set(RW3DM_BUILD_ON2JSON ON CACHE BOOL "Compile and install OpenNURBS to JSON con
 set(RW3DM_BUILD_JSON2ON ON CACHE BOOL "Compile and install JSON to OpenNURBS converter")
 set(RW3DM_BUILD_ON_DLL OFF CACHE BOOL "Dynamically link OpenNURBS library")
 
+# Set common runtime output directory
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 
