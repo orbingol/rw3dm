@@ -84,9 +84,17 @@ int main(int argc, char **argv)
     for (auto d : root["shape"]["data"])
     {
         if (root["shape"]["type"].asString() == "curve")
-            constructCurveData(d, cfg, model);
+        {
+            ON_NurbsCurve *geom;
+            constructCurveData(d, cfg, geom);
+            model.AddManagedModelGeometryComponent(geom, nullptr);
+        }
         if (root["shape"]["type"].asString() == "surface")
-            constructSurfaceData(d, cfg, model);
+        {
+            ON_Brep *geom;
+            constructSurfaceData(d, cfg, geom);
+            model.AddManagedModelGeometryComponent(geom, nullptr);
+        }
     }
 
     // Write model to the file (version = 50)

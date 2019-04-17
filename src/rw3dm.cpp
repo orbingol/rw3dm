@@ -334,8 +334,7 @@ void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data
     }
 }
 
-ON_ModelComponentReference
-constructCurveData(Json::Value &data, Config &cfg, ONX_Model &model)
+void constructCurveData(Json::Value &data, Config &cfg, ON_NurbsCurve *&nurbsCurve)
 {
     // Control points array
     Json::Value ctrlpts = data["control_points"];
@@ -347,7 +346,7 @@ constructCurveData(Json::Value &data, Config &cfg, ONX_Model &model)
     int numCtrlpts = data["control_points"]["points"].size();
 
     // Create a curve instance
-    ON_NurbsCurve nurbsCurve(
+    nurbsCurve = ON_NurbsCurve::New(
         dimension,
         (data.isMember("rational")) ? data["rational"].asInt() : 1,
         data["degree"].asInt() + 1,
@@ -355,25 +354,21 @@ constructCurveData(Json::Value &data, Config &cfg, ONX_Model &model)
     );
 
     // Set knot vector
-    for (int idx = 0; idx < nurbsCurve.KnotCount(); idx++)
-        nurbsCurve.SetKnot(idx, data["knotvector"][idx].asDouble());
+    for (int idx = 0; idx < nurbsCurve->KnotCount(); idx++)
+        nurbsCurve->SetKnot(idx, data["knotvector"][idx + 1].asDouble());
 
     // Set control points
-    for (int idx = 0; idx < nurbsCurve.CVCount(); idx++)
+    for (int idx = 0; idx < nurbsCurve->CVCount(); idx++)
     {
         Json::Value cptData = ctrlpts["points"][idx];
         ON_3dPoint cpt(cptData[0].asDouble(), cptData[1].asDouble(), (dimension == 2) ? 0.0 : cptData[2].asDouble());
-        nurbsCurve.SetCV(idx, cpt);
+        nurbsCurve->SetCV(idx, cpt);
         if (ctrlpts.isMember("weights"))
-            nurbsCurve.SetWeight(idx, ctrlpts["weights"].asDouble());
+            nurbsCurve->SetWeight(idx, ctrlpts["weights"].asDouble());
     }
-
-    // Add curve to the model
-    return model.AddModelGeometryComponent(&nurbsCurve, nullptr);
 }
 
-ON_ModelComponentReference
-constructSurfaceData(Json::Value &data, Config &cfg, ONX_Model &model)
+void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
 {
     // Control points array
     Json::Value ctrlpts = data["control_points"];
@@ -386,7 +381,7 @@ constructSurfaceData(Json::Value &data, Config &cfg, ONX_Model &model)
     int sizeV = data["size_v"].asInt();
 
     // Create a surface instance
-    ON_NurbsSurface nurbsSurface(
+    ON_NurbsSurface *nurbsSurface = ON_NurbsSurface::New(
         dimension,
         (data.isMember("rational")) ? data["rational"].asInt() : 1,
         data["degree_u"].asInt() + 1,
@@ -396,30 +391,30 @@ constructSurfaceData(Json::Value &data, Config &cfg, ONX_Model &model)
     );
 
     // Set knot vectors
-    for (int idx = 0; idx < nurbsSurface.KnotCount(0); idx++)
-        nurbsSurface.SetKnot(0, idx, data["knotvector_u"][idx].asDouble());
-    for (int idx = 0; idx < nurbsSurface.KnotCount(1); idx++)
-        nurbsSurface.SetKnot(1, idx, data["knotvector_v"][idx].asDouble());
+    for (int idx = 0; idx < nurbsSurface->KnotCount(0); idx++)
+        nurbsSurface->SetKnot(0, idx, data["knotvector_u"][idx + 1].asDouble());
+    for (int idx = 0; idx < nurbsSurface->KnotCount(1); idx++)
+        nurbsSurface->SetKnot(1, idx, data["knotvector_v"][idx + 1].asDouble());
 
     // Set control points
-    for (int idxU = 0; idxU < nurbsSurface.CVCount(0); idxU++)
+    for (int idxU = 0; idxU < nurbsSurface->CVCount(0); idxU++)
     {
-        for (int idxV = 0; idxV < nurbsSurface.CVCount(1); idxV++)
+        for (int idxV = 0; idxV < nurbsSurface->CVCount(1); idxV++)
         {
             unsigned int idx = idxV + (idxU * sizeV);
             Json::Value cptData = ctrlpts["points"][idx];
             ON_3dPoint cpt(cptData[0].asDouble(), cptData[1].asDouble(), cptData[2].asDouble());
-            nurbsSurface.SetCV(idxU, idxV, cpt);
+            nurbsSurface->SetCV(idxU, idxV, cpt);
             if (ctrlpts.isMember("weights"))
-                nurbsSurface.SetWeight(idxU, idxV, ctrlpts["weights"].asDouble());
+                nurbsSurface->SetWeight(idxU, idxV, ctrlpts["weights"][idx].asDouble());
         }
     }
 
     // Each surface (and the trim curves) should belong to a BRep object
-    ON_Brep brep;
+    brep = ON_Brep::New();
 
     // Add surface to the BRep object
-    brep.NewFace(nurbsSurface);
+    brep->Create(nurbsSurface);
 
     // Process trims
     if (data.isMember("trims"))
@@ -428,32 +423,31 @@ constructSurfaceData(Json::Value &data, Config &cfg, ONX_Model &model)
         if (trims.isMember("data"))
         {
             ONX_Model trimModel;
-            for (auto trim : trims["trims"]["data"])
+            for (auto trim : trims["data"])
             {
-                // Construct the trim curve and get its reference
-                ON_ModelComponentReference trimRef = constructCurveData(trim, cfg, trimModel);
-                // Start converting reference to the curve object
-                const ON_ModelGeometryComponent *trimGeomComp = ON_ModelGeometryComponent::FromModelComponentRef(trimRef, nullptr);
-                ON_Geometry *trimGeom = trimGeomComp->ExclusiveGeometry();
-                ON_Curve *trimCurve = ON_Curve::Cast(trimGeom);
+                // Construct the trim curve
+                ON_NurbsCurve *trimCurve;
+                constructCurveData(trim, cfg, trimCurve);
                 // Add trim curve to the BRep object
-                int trimIdx = brep.AddTrimCurve(trimCurve);
+                int trimIdx = brep->AddTrimCurve(trimCurve);
                 // If trim is valid, add trim sense, i.e. trim direction w.r.t. the face
                 if (trimIdx > -1)
                 {
-                    ON_BrepTrim *brepTrim = brep.Trim(trimIdx);
-                    if (brepTrim)
-                    {
-                        if (trim.isMember("reversed"))
-                            brepTrim->m_bRev3d = trim["reversed"].asBool();
-                        else
-                            brepTrim->m_bRev3d = true;  // trim inside the curve
-                    }
+                    // Trim sense
+                    int bRev3d = (trim.isMember("reversed")) ? !trim["reversed"].asBool() : true;  // trim inside the curve
+
+                    /*
+                    OpenNURBS requires a mapping of of 2D trim curve to 3D edge curve and the documentation says ON_BrepFace::Pushup()
+                    should do the work. However, that method does not exist in this version of the OpenNURBS library. Future versions
+                    of json2on may come with a fix but there is a very high possibility to wait OpenNURBS developers to fix this issue.
+                    */
+
+                    // Update BRep object
+                    brep->NewTrim(trimIdx);
                 }
             }
+            // Set necessary trim flags
+            brep->SetTolerancesBoxesAndFlags();
         }
     }
-
-    // Add BRep to the model
-    return model.AddModelGeometryComponent(&brep, nullptr);
 }

@@ -37,7 +37,7 @@ void extractSurfaceData(const ON_Geometry *, Config &, Json::Value &);
 void extractBrepData(const ON_Geometry *, Config &, Json::Value &);
 
 // Geometry conversion (geomdl -> 3DM)
-ON_ModelComponentReference constructCurveData(Json::Value &, Config &, ONX_Model &);
-ON_ModelComponentReference constructSurfaceData(Json::Value &, Config &, ONX_Model &);
+void constructCurveData(Json::Value &, Config &, ON_NurbsCurve *&);
+void constructSurfaceData(Json::Value &, Config &, ON_Brep *&);
 
 #endif /* RW3DM_H */
