@@ -20,57 +20,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "common.h"
-#include "rw3dm.h"
+#include "on2json.h"
 
 
-// RW3DM executable
-int main(int argc, char **argv)
+bool on2json(std::string &fileName, Config &cfg, std::string &jsonString)
 {
-    // Print app information
-    std::cout << "ON2JSON: Spline Geometry Extractor for Rhino/OpenNURBS" << std::endl;
-    std::cout << "Copyright (c) 2019 IDEA Lab at Iowa State University." << std::endl;
-    std::cout << "Licensed under the terms of the MIT License.\n" << std::endl;
-
-    // File name to read
-    std::string filename;
-
-    // Initialize configuration
-    Config cfg;
-
-    if (argc < 2 || argc > 3)
-    {
-        std::cout << "Usage: " << argv[0] << " FILENAME OPTIONS\n" << std::endl;
-        std::cout << "Available options:" << std::endl;
-        for (auto p : cfg.params)
-            std::cout << "  - " << p.first << ": " << p.second.second << std::endl;
-        std::cout << "\nExample: " << argv[0] << " my_file.3dm normalize=false;trims=true" << std::endl;
-        return EXIT_FAILURE;
-    }
-    else
-        filename = std::string(argv[1]);
-
-    // Update configuration
-    if (argc == 3)
-        parseConfig(argv[2], cfg);
-
-    // Print configuration
-    if (cfg.show_config())
-    {
-        std::cout << "Using configuration:" << std::endl;
-        for (auto p : cfg.params)
-            std::cout << "  - " << p.first << ": " << p.second.first << std::endl;
-    }
-
-    // Start OpenNURBS
+    // Start modeler
     initializeRwExt();
 
     // Try to open .3DM file
-    FILE* fp = ON::OpenFile(filename.c_str(), "rb");
+    FILE* fp = ON::OpenFile(fileName.c_str(), "rb");
     if (!fp)
     {
-        std::cout << "[ERROR]: Cannot open file '" << filename << "' for reading" << std::endl;
-        return EXIT_FAILURE;
+        std::cout << "[ERROR] Cannot open file '" << fileName << "' for reading" << std::endl;
+        return false;
     }
 
     // Create achive object from file pointer
@@ -83,12 +46,9 @@ int main(int argc, char **argv)
     unsigned int tableFilter = ON::curve_object | ON::surface_object;
     if (!model.IncrementalReadBegin(archive, true, tableFilter, (ON_TextLog *)nullptr))
     {
-        std::cout << "[ERROR]: Cannot start reading model archive from the file " << filename << std::endl;
-        return EXIT_FAILURE;
+        std::cout << "[ERROR] Cannot start reading model archive from the file " << fileName << std::endl;
+        return false;
     }
-
-    // Create JSON root object
-    Json::Value root;
     
     // Create JSON shape object
     Json::Value shapeDef;
@@ -153,44 +113,54 @@ int main(int argc, char **argv)
     // Finish reading the model archive
     if (!model.IncrementalReadFinish(archive, true, tableFilter, (ON_TextLog *)nullptr))
     {
-        std::cout << "ERROR: Cannot complete reading model archive from the file " << filename << std::endl;
-        return EXIT_FAILURE;
+        std::cout << "[ERROR] Cannot complete reading model archive from the file " << fileName << std::endl;
+        return false;
     }
 
     // Close file
     ON::CloseFile(fp);
 
-    // Stop OpenNURBS
+    // Stop modeler
     finalizeRwExt();
 
-    // Update root JSON object
+    // Update shape JSON object
     shapeDef["count"] = modelCount;
     shapeDef["data"] = dataDef;
+
+    // Create root JSON object
+    Json::Value root;
     root["shape"] = shapeDef;
 
-    // Try to open JSON file for writing
-    std::string fnameSave = filename.substr(0, filename.find_last_of(".")) + ".json";
-    std::ofstream fileSave(fnameSave.c_str(), std::ios::out);
-    if (!fileSave)
-    {
-        std::cerr << "[ERROR] Cannot open file '" << fnameSave << "' for writing!" << std::endl;
-        return EXIT_FAILURE;
-    }
-    else
-    {
-        // Convert JSON data structure into a string
-        Json::StreamWriterBuilder wbuilder;
-        wbuilder["indentation"] = "\t";
-        std::string jsonDocument = Json::writeString(wbuilder, root);
+    // Convert root JSON object into a string
+    Json::StreamWriterBuilder wbuilder;
+    wbuilder["indentation"] = "\t";
+    jsonString = Json::writeString(wbuilder, root);
 
-        // Write JSON string to a file
-        fileSave << jsonDocument << std::endl;
+    return true;
+}
+
+bool on2json_run(std::string &fileName, Config &cfg)
+{
+    std::string jsonString;
+    if (on2json(fileName, cfg, jsonString))
+    {
+        // Try to open a file for writing JSON string
+        std::string fnameSave = fileName.substr(0, fileName.find_last_of(".")) + ".json";
+        std::ofstream fileSave(fnameSave.c_str(), std::ios::out);
+        if (!fileSave)
+        {
+            std::cerr << "[ERROR] Cannot open file '" << fnameSave << "' for writing!" << std::endl;
+            return false;
+        }
+
+        // Save JSON string to the file
+        fileSave << jsonString << std::endl;
         fileSave.close();
 
         // Print success message
         std::cout << "[SUCCESS] Geometry data was extracted to file '" << fnameSave << "' successfully" << std::endl;
+        return true;
     }
 
-    // Exit successfully
-    return EXIT_SUCCESS;
+    return false;
 }

@@ -46,7 +46,9 @@ if(RW3DM_BUILD_ON2JSON)
     src/rw3dm.cpp
     src/common.h
     src/common.cpp
+    src/on2json.h
     src/on2json.cpp
+    src/main_on2json.cpp
   )
 
   # Generate ON2JSON executable
@@ -71,7 +73,9 @@ if(RW3DM_BUILD_JSON2ON)
     src/rw3dm.cpp
     src/common.h
     src/common.cpp
+    src/json2on.h
     src/json2on.cpp
+    src/main_json2on.cpp
   )
 
   # Generate executable for JSON2ON

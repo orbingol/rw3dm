@@ -20,61 +20,26 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "common.h"
-#include "rw3dm.h"
+#include "json2on.h"
 
 
-// JSON2ON executable
-int main(int argc, char **argv)
+bool json2on(std::string &jsonString, Config &cfg, std::string &fileName)
 {
-    // Print app information
-    std::cout << "JSON2ON: Spline Geometry Converter for Rhino/OpenNURBS" << std::endl;
-    std::cout << "Copyright (c) 2019 IDEA Lab at Iowa State University." << std::endl;
-    std::cout << "Licensed under the terms of the MIT License.\n" << std::endl;
+    // Copy string to the stream
+    std::stringstream ss;
+    ss << jsonString;
 
-    // File name to read
-    std::string filename;
-
-    // Initialize configuration
-    Config cfg;
-
-    if (argc < 2 || argc > 3)
-    {
-        std::cout << "Usage: " << argv[0] << " FILENAME OPTIONS\n" << std::endl;
-        std::cout << "Available options:" << std::endl;
-        for (auto p : cfg.params)
-            std::cout << "  - " << p.first << ": " << p.second.second << std::endl;
-        std::cout << "\nExample: " << argv[0] << " my_file.json warnings=true" << std::endl;
-        return EXIT_FAILURE;
-    }
-    else
-        filename = std::string(argv[1]);
-
-    // Update configuration
-    if (argc == 3)
-        parseConfig(argv[2], cfg);
-
-    // Print configuration
-    if (cfg.show_config())
-    {
-        std::cout << "Using configuration:" << std::endl;
-        for (auto p : cfg.params)
-            std::cout << "  - " << p.first << ": " << p.second.first << std::endl;
-    }
-
-    // Open JSON file
-    std::ifstream fp(filename);
-    if (!fp)
-    {
-        std::cout << "[ERROR]: Cannot open file '" << filename << "' for reading" << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    // Fill the JSON object
+    // Convert string to JSON object
     Json::Value root;
-    fp >> root;
+    Json::CharReaderBuilder rbuilder;
+    std::string jsonErrors;
+    if (!Json::parseFromStream(rbuilder, ss, &root, &jsonErrors))
+    {
+        std::cout << "[ERROR]: Failed to parse JSON string: " << jsonErrors << std::endl;
+        return false;
+    }
 
-    // Start OpenNURBS
+    // Start modeler
     initializeRwExt();
 
     // Create model
@@ -98,16 +63,34 @@ int main(int argc, char **argv)
     }
 
     // Write model to the file (version = 50)
-    std::string fnameSave = filename.substr(0, filename.find_last_of(".")) + ".3dm";
-    if (model.Write(fnameSave.c_str(), 50))
-    {
-        // Print success message
-        std::cout << "[SUCCESS] Geometry data was saved to file '" << fnameSave << "' successfully" << std::endl;
-    }
+    std::string fnameSave = fileName.substr(0, fileName.find_last_of(".")) + ".3dm";
+    bool saveStatus = model.Write(fnameSave.c_str(), 50);
 
-    // Stop OpenNURBS
+    // Stop modeler
     finalizeRwExt();
 
-    // Exit successfully
-    return EXIT_SUCCESS;
+    // Print message if save is success
+    if (saveStatus)
+        std::cout << "[SUCCESS] Geometry data was saved to file '" << fnameSave << "' successfully" << std::endl;
+    return saveStatus;
+}
+
+
+bool json2on_run(std::string &fileName, Config &cfg)
+{
+    // Open JSON file
+    std::ifstream fp(fileName);
+    if (!fp)
+    {
+        std::cout << "[ERROR] Cannot open file '" << fileName << "' for reading" << std::endl;
+        return false;
+    }
+
+    // Read file to a string
+    std::string jsonString;
+    fp >> jsonString;
+
+    if (json2on(jsonString, cfg, fileName))
+        return true;
+    return false;
 }
