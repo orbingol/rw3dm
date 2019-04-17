@@ -41,7 +41,7 @@ struct Config {
     // Config parameters
     std::map< std::string, std::pair<std::string, std::string> > params = {
         { "show_config", { "0", "Prints the configuration" } },
-        { "warnings", { "0", "Enable warnings" } },
+        { "silent", { "0", "Disables all printed messages" } },
         { "normalize", { "1", "Normalize knot vectors and scale trim curves to [0,1] domain" } },
         { "trims", { "1", "Extract trim curves" } },
         { "sense", { "1", "Extract surface and trim curve direction w.r.t. the face" } },
@@ -50,7 +50,7 @@ struct Config {
 
     // Methods
     bool show_config();
-    bool warnings();
+    bool silent();
     bool normalize();
     bool trims();
     bool sense();

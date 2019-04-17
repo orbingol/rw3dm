@@ -29,8 +29,8 @@ bool Config::show_config()
 }
 
 
-bool Config::warnings() {
-    return bool(std::atoi(params.at("warnings").first.c_str()));
+bool Config::silent() {
+    return bool(std::atoi(params.at("silent").first.c_str()));
 }
 
 bool Config::normalize()

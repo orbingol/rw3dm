@@ -35,7 +35,8 @@ bool json2on(std::string &jsonString, Config &cfg, std::string &fileName)
     std::string jsonErrors;
     if (!Json::parseFromStream(rbuilder, ss, &root, &jsonErrors))
     {
-        std::cout << "[ERROR]: Failed to parse JSON string: " << jsonErrors << std::endl;
+        if (!cfg.silent())
+            std::cout << "[ERROR] Failed to parse JSON string: " << jsonErrors << std::endl;
         return false;
     }
 
@@ -70,7 +71,7 @@ bool json2on(std::string &jsonString, Config &cfg, std::string &fileName)
     finalizeRwExt();
 
     // Print message if save is success
-    if (saveStatus)
+    if (saveStatus && !cfg.silent())
         std::cout << "[SUCCESS] Geometry data was saved to file '" << fnameSave << "' successfully" << std::endl;
     return saveStatus;
 }
@@ -82,7 +83,8 @@ bool json2on_run(std::string &fileName, Config &cfg)
     std::ifstream fp(fileName);
     if (!fp)
     {
-        std::cout << "[ERROR] Cannot open file '" << fileName << "' for reading" << std::endl;
+        if (!cfg.silent())
+            std::cout << "[ERROR] Cannot open file '" << fileName << "' for reading" << std::endl;
         return false;
     }
 

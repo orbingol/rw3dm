@@ -32,7 +32,8 @@ bool on2json(std::string &fileName, Config &cfg, std::string &jsonString)
     FILE* fp = ON::OpenFile(fileName.c_str(), "rb");
     if (!fp)
     {
-        std::cout << "[ERROR] Cannot open file '" << fileName << "' for reading" << std::endl;
+        if (!cfg.silent())
+            std::cout << "[ERROR] Cannot open file '" << fileName << "' for reading" << std::endl;
         return false;
     }
 
@@ -46,7 +47,8 @@ bool on2json(std::string &fileName, Config &cfg, std::string &jsonString)
     unsigned int tableFilter = ON::curve_object | ON::surface_object;
     if (!model.IncrementalReadBegin(archive, true, tableFilter, (ON_TextLog *)nullptr))
     {
-        std::cout << "[ERROR] Cannot start reading model archive from the file " << fileName << std::endl;
+        if (!cfg.silent())
+            std::cout << "[ERROR] Cannot start reading model archive from the file " << fileName << std::endl;
         return false;
     }
     
@@ -113,7 +115,8 @@ bool on2json(std::string &fileName, Config &cfg, std::string &jsonString)
     // Finish reading the model archive
     if (!model.IncrementalReadFinish(archive, true, tableFilter, (ON_TextLog *)nullptr))
     {
-        std::cout << "[ERROR] Cannot complete reading model archive from the file " << fileName << std::endl;
+        if (!cfg.silent())
+            std::cout << "[ERROR] Cannot complete reading model archive from the file " << fileName << std::endl;
         return false;
     }
 
@@ -149,7 +152,8 @@ bool on2json_run(std::string &fileName, Config &cfg)
         std::ofstream fileSave(fnameSave.c_str(), std::ios::out);
         if (!fileSave)
         {
-            std::cerr << "[ERROR] Cannot open file '" << fnameSave << "' for writing!" << std::endl;
+            if (!cfg.silent())
+                std::cout << "[ERROR] Cannot open file '" << fnameSave << "' for writing!" << std::endl;
             return false;
         }
 
@@ -158,7 +162,8 @@ bool on2json_run(std::string &fileName, Config &cfg)
         fileSave.close();
 
         // Print success message
-        std::cout << "[SUCCESS] Geometry data was extracted to file '" << fnameSave << "' successfully" << std::endl;
+        if (!cfg.silent())
+            std::cout << "[SUCCESS] Geometry data was extracted to file '" << fnameSave << "' successfully" << std::endl;
         return true;
     }
 
