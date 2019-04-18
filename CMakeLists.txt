@@ -39,16 +39,23 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   )
 endif()
 
+# Generate rw3dm core as a static library
+set(SOURCE_FILES_RW3DMLIB
+  src/rw3dm/common.h
+  src/rw3dm/common.cpp
+  src/rw3dm/rw3dm.h
+  src/rw3dm/rw3dm.cpp
+)
+add_library(rw3dm STATIC ${SOURCE_FILES_RW3DMLIB})
+target_link_libraries(rw3dm PRIVATE jsoncpp opennurbs)
+target_include_directories(rw3dm PUBLIC "${CMAKE_CURRENT_LIST_DIR}/src/rw3dm")
+
 if(RW3DM_BUILD_ON2JSON)
   # Set source files for ON2JSON
   set(SOURCE_FILES_ON2JSON
-    src/rw3dm.h
-    src/rw3dm.cpp
-    src/common.h
-    src/common.cpp
-    src/on2json.h
-    src/on2json.cpp
-    src/main_on2json.cpp
+    src/on2json/on2json.h
+    src/on2json/on2json.cpp
+    src/on2json/main.cpp
   )
 
   # Generate ON2JSON executable
@@ -56,7 +63,7 @@ if(RW3DM_BUILD_ON2JSON)
   target_compile_definitions(on2json
       PRIVATE ${BUILD_COMP_DEFS}
   )
-  target_link_libraries(on2json PRIVATE jsoncpp opennurbs)
+  target_link_libraries(on2json PRIVATE jsoncpp opennurbs rw3dm)
   set_target_properties(on2json PROPERTIES DEBUG_POSTFIX "d")
 
   # Install the ON2JSON binary
@@ -69,13 +76,9 @@ endif()
 if(RW3DM_BUILD_JSON2ON)
   # Set source files for JSON2ON
   set(SOURCE_FILES_JSON2ON
-    src/rw3dm.h
-    src/rw3dm.cpp
-    src/common.h
-    src/common.cpp
-    src/json2on.h
-    src/json2on.cpp
-    src/main_json2on.cpp
+    src/json2on/json2on.h
+    src/json2on/json2on.cpp
+    src/json2on/main.cpp
   )
 
   # Generate executable for JSON2ON
@@ -83,7 +86,7 @@ if(RW3DM_BUILD_JSON2ON)
   target_compile_definitions(on2json
       PRIVATE ${BUILD_COMP_DEFS}
   )
-  target_link_libraries(json2on PRIVATE jsoncpp opennurbs)
+  target_link_libraries(json2on PRIVATE jsoncpp opennurbs rw3dm)
   set_target_properties(json2on PROPERTIES DEBUG_POSTFIX "d")
 
   # Install the JSON2ON binary
