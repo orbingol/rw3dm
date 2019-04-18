@@ -301,6 +301,7 @@ void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data
                             Json::Value trimData;
                             trimData["type"] = "container";
                             trimData["data"] = trimLoopData;
+                            trimData["count"] = trimLoopData.size();
                             // Detect the sense
                             trimData["reversed"] = (brepLoop->m_type == ON_BrepLoop::TYPE::outer) ? true : false;
 
