@@ -438,23 +438,8 @@ void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
                 ON_NurbsCurve *trimCurve;
                 constructCurveData(trim, cfg, trimCurve);
 
-                // Try to understand if the extracted curve is the edge
-                unsigned int trimValidateCount = 0;
-                if (trimCurve->Degree() == 1)
-                {
-                    double *cp1 = trimCurve->CV(0);
-                    double *cp2 = trimCurve->CV(1);
-                    for (int i = 0; i < 2; i++)
-                    {
-                        if (cp1[i] == 0.0 || cp1[i] == 1.0)
-                            trimValidateCount++;
-                        if (cp2[i] == 0.0 || cp2[i] == 1.0)
-                            trimValidateCount++;
-                    }
-                }
-
-                // Skip edge curves
-                if (trimValidateCount == 4)
+                // Try to understand if the extracted trim curve is the edge of the surface
+                if (checkLinearBoundaryTrim(trimCurve))
                     continue;
 
                 // Add trim curve to the BRep object
@@ -479,4 +464,24 @@ void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
             brep->SetTolerancesBoxesAndFlags();
         }
     }
+}
+
+bool checkLinearBoundaryTrim(ON_NurbsCurve *trimCurve)
+{
+    unsigned int trimValidateCount = 0;
+    if (trimCurve->Degree() == 1)
+    {
+        double *cp1 = trimCurve->CV(0);
+        double *cp2 = trimCurve->CV(1);
+        for (int i = 0; i < 2; i++)
+        {
+            if (cp1[i] == 0.0 || cp1[i] == 1.0)
+                trimValidateCount++;
+            if (cp2[i] == 0.0 || cp2[i] == 1.0)
+                trimValidateCount++;
+        }
+    }
+    if (trimValidateCount == 4)
+        return true;
+    return false;
 }
