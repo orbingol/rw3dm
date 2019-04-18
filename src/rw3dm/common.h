@@ -40,8 +40,8 @@ SOFTWARE.
 struct Config {
     // Config parameters
     std::map< std::string, std::pair<std::string, std::string> > params = {
-        { "show_config", { "0", "Prints the configuration" } },
-        { "silent", { "0", "Disables all printed messages" } },
+        { "show_config", { "0", "Print the configuration" } },
+        { "silent", { "0", "Disable all printed messages" } },
         { "normalize", { "1", "Normalize knot vectors and scale trim curves to [0,1] domain" } },
         { "trims", { "1", "Extract trim curves" } },
         { "sense", { "1", "Extract surface and trim curve direction w.r.t. the face" } },
