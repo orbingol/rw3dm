@@ -26,8 +26,7 @@ SOFTWARE.
 bool json2on(std::string &jsonString, Config &cfg, std::string &fileName)
 {
     // Copy string to the stream
-    std::stringstream ss;
-    ss << jsonString;
+    std::stringstream ss(jsonString);
 
     // Convert string to JSON object
     Json::Value root;
@@ -64,20 +63,17 @@ bool json2on(std::string &jsonString, Config &cfg, std::string &fileName)
     }
 
     // Write model to the file (version = 50)
-    std::string fnameSave = fileName.substr(0, fileName.find_last_of(".")) + ".3dm";
-    bool saveStatus = model.Write(fnameSave.c_str(), 50);
+    bool saveStatus = model.Write(fileName.c_str(), 50);
 
     // Stop modeler
     finalizeRwExt();
 
-    // Print message if save is success
-    if (saveStatus && !cfg.silent())
-        std::cout << "[SUCCESS] Geometry data was saved to file '" << fnameSave << "' successfully" << std::endl;
+    // Return save status
     return saveStatus;
 }
 
 
-bool json2on_run(std::string &fileName, Config &cfg)
+std::string json2on_run(std::string &fileName, Config &cfg)
 {
     // Open JSON file
     std::ifstream fp(fileName);
@@ -89,10 +85,15 @@ bool json2on_run(std::string &fileName, Config &cfg)
     }
 
     // Read file to a string
-    std::string jsonString;
-    fp >> jsonString;
+    std::stringstream buffer;
+    buffer << fp.rdbuf();
+    std::string jsonString = buffer.str();
 
-    if (json2on(jsonString, cfg, fileName))
-        return true;
-    return false;
+    // Prepare save file name
+    std::string fnameSave = fileName.substr(0, fileName.find_last_of(".")) + ".3dm";
+
+    // Convert geometry to .3dm format
+    if (!json2on(jsonString, cfg, fnameSave))
+        fnameSave.clear();
+    return fnameSave;
 }

@@ -52,13 +52,6 @@ bool on2json(std::string &fileName, Config &cfg, std::string &jsonString)
         return false;
     }
     
-    // Create JSON shape object
-    Json::Value shapeDef;
-    if (cfg.extract_curves())
-        shapeDef["type"] = "curve";
-    else
-        shapeDef["type"] = "surface";
-
     // Create JSON data object
     Json::Value dataDef;
 
@@ -126,7 +119,13 @@ bool on2json(std::string &fileName, Config &cfg, std::string &jsonString)
     // Stop modeler
     finalizeRwExt();
 
-    // Update shape JSON object
+    // If no geometry was extracted, do not continue
+    if (dataDef.empty())
+        return false;
+
+    // Create shape JSON object
+    Json::Value shapeDef;
+    shapeDef["type"] = (cfg.extract_curves()) ? "curve" : "surface";
     shapeDef["count"] = modelCount;
     shapeDef["data"] = dataDef;
 
@@ -142,13 +141,17 @@ bool on2json(std::string &fileName, Config &cfg, std::string &jsonString)
     return true;
 }
 
-bool on2json_run(std::string &fileName, Config &cfg)
+std::string on2json_run(std::string &fileName, Config &cfg)
 {
+    // Save file name
+    std::string fnameSave;
+
+    // Extract geometry data from .3dm file
     std::string jsonString;
     if (on2json(fileName, cfg, jsonString))
     {
         // Try to open a file for writing JSON string
-        std::string fnameSave = fileName.substr(0, fileName.find_last_of(".")) + ".json";
+        fnameSave = fileName.substr(0, fileName.find_last_of(".")) + ".json";
         std::ofstream fileSave(fnameSave.c_str(), std::ios::out);
         if (!fileSave)
         {
@@ -160,12 +163,7 @@ bool on2json_run(std::string &fileName, Config &cfg)
         // Save JSON string to the file
         fileSave << jsonString << std::endl;
         fileSave.close();
-
-        // Print success message
-        if (!cfg.silent())
-            std::cout << "[SUCCESS] Geometry data was extracted to file '" << fnameSave << "' successfully" << std::endl;
-        return true;
     }
 
-    return false;
+    return fnameSave;
 }

@@ -32,7 +32,7 @@ bool json2on(std::string &, Config &, std::string &);
 
 /** \brief Convert geomdl JSON file to a .3dm file.
 */
-bool json2on_run(std::string &, Config &);
+std::string json2on_run(std::string &, Config &);
 
 #endif /* JSON2ON_H */
 

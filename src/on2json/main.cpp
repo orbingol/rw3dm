@@ -63,7 +63,16 @@ int main(int argc, char **argv)
     }
 
     // Convert .3dm file to geomdl .json file
-    if (!on2json_run(filename, cfg))
+    std::string output = on2json_run(filename, cfg);
+
+    // If converter returns an empty string, it means a failure
+    if (output.empty())
+    {
+        std::cout << "[ERROR] Geometry data was NOT extracted successfully" << std::endl;
         return EXIT_FAILURE;
+    }
+
+    // Print success message
+    std::cout << "[SUCCESS] Geometry data was extracted to file '" << output << "' successfully" << std::endl;
     return EXIT_SUCCESS;
 }
