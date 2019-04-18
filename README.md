@@ -46,7 +46,7 @@ If you prefer to update the compiled binaries on your own, you can follow the fo
 
 * Visual Studio 2017 is required to compile OpenNURBS
 * Please install C++ support on Visual Studio as it is not installed by default
-* Choose **Release** as the build configuration inside Visual Studio before you compile the module
+* Choose **Release** as the build configuration inside Visual Studio before you compile the package
 
 #### For Linux
 
@@ -64,6 +64,19 @@ The JSON files can be imported via [geomdl](https://github.com/orbingol/NURBS-Py
 
 `json2on` executable can be used to convert JSON format supported by [geomdl](https://github.com/orbingol/NURBS-Python) to .3DM files.
 The JSON files can be exported via [geomdl](https://github.com/orbingol/NURBS-Python)'s `exchange.export_json` API call.
+
+### Available arguments
+
+Run `on2json` and `json2on` to see the available command-line arguments:
+
+* `extract_curves`: Extract curves (Default is extract surfaces)
+* `normalize`: Normalize knot vectors and scale trim curves to [0,1] domain
+* `sense`: Extract surface and trim curve direction w.r.t. the face
+* `show_config`: Print the configuration
+* `silent`: Disable all printed messages
+* `trims`: Extract trim curves
+
+**Example**: `on2json MyONFile.3dm extract_curves=True`, extracts curves from *MyONFile.3dm*
 
 ## Author
 
