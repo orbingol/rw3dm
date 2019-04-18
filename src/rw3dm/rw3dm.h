@@ -41,6 +41,6 @@ void constructCurveData(Json::Value &, Config &, ON_NurbsCurve *&);
 void constructSurfaceData(Json::Value &, Config &, ON_Brep *&);
 
 // Helper functions
-bool checkBoundaryTrim(ON_NurbsCurve *);
+bool checkLinearBoundaryTrim(ON_NurbsCurve *);
 
 #endif /* RW3DM_H */
