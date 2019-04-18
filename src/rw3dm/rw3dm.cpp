@@ -427,9 +427,36 @@ void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
             ONX_Model trimModel;
             for (auto trim : trims["data"])
             {
+                // Get trim type
+                std::string trimType = trim["type"].asString();
+
+                // Currently, only spline trim curves are supported
+                if (trimType != "spline")
+                    continue;
+
                 // Construct the trim curve
                 ON_NurbsCurve *trimCurve;
                 constructCurveData(trim, cfg, trimCurve);
+
+                // Try to understand if the extracted curve is the edge
+                unsigned int trimValidateCount = 0;
+                if (trimCurve->Degree() == 1)
+                {
+                    double *cp1 = trimCurve->CV(0);
+                    double *cp2 = trimCurve->CV(1);
+                    for (int i = 0; i < 2; i++)
+                    {
+                        if (cp1[i] == 0.0 || cp1[i] == 1.0)
+                            trimValidateCount++;
+                        if (cp2[i] == 0.0 || cp2[i] == 1.0)
+                            trimValidateCount++;
+                    }
+                }
+
+                // Skip edge curves
+                if (trimValidateCount == 4)
+                    continue;
+
                 // Add trim curve to the BRep object
                 int trimIdx = brep->AddTrimCurve(trimCurve);
                 // If trim is valid, add trim sense, i.e. trim direction w.r.t. the face
