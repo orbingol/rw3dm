@@ -422,6 +422,7 @@ void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
         Json::Value trims = data["trims"];
         if (trims.isMember("data"))
         {
+            // Loop trims array
             ONX_Model trimModel;
             for (auto trim : trims["data"])
             {
