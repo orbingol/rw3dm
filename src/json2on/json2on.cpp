@@ -75,25 +75,30 @@ bool json2on(std::string &jsonString, Config &cfg, std::string &fileName)
 
 std::string json2on_run(std::string &fileName, Config &cfg)
 {
+    // Save file name
+    std::string fnameSave;
+
     // Open JSON file
     std::ifstream fp(fileName);
     if (!fp)
     {
         if (!cfg.silent())
             std::cout << "[ERROR] Cannot open file '" << fileName << "' for reading" << std::endl;
-        return false;
+    }
+    else
+    {
+        // Read file to a string
+        std::stringstream buffer;
+        buffer << fp.rdbuf();
+        std::string jsonString = buffer.str();
+
+        // Prepare save file name
+        fnameSave = fileName.substr(0, fileName.find_last_of(".")) + ".3dm";
+
+        // Convert geometry to .3dm format
+        if (!json2on(jsonString, cfg, fnameSave))
+            fnameSave.clear();
     }
 
-    // Read file to a string
-    std::stringstream buffer;
-    buffer << fp.rdbuf();
-    std::string jsonString = buffer.str();
-
-    // Prepare save file name
-    std::string fnameSave = fileName.substr(0, fileName.find_last_of(".")) + ".3dm";
-
-    // Convert geometry to .3dm format
-    if (!json2on(jsonString, cfg, fnameSave))
-        fnameSave.clear();
     return fnameSave;
 }

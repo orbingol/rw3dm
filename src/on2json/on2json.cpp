@@ -155,14 +155,16 @@ std::string on2json_run(std::string &fileName, Config &cfg)
         std::ofstream fileSave(fnameSave.c_str(), std::ios::out);
         if (!fileSave)
         {
+            // Save JSON string to the file
+            fileSave << jsonString << std::endl;
+            fileSave.close();
+        }
+        else
+        {
             if (!cfg.silent())
                 std::cout << "[ERROR] Cannot open file '" << fnameSave << "' for writing!" << std::endl;
-            return false;
+            fnameSave.clear();
         }
-
-        // Save JSON string to the file
-        fileSave << jsonString << std::endl;
-        fileSave.close();
     }
 
     return fnameSave;
