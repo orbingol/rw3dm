@@ -454,17 +454,19 @@ void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
                 // If trim is valid, add trim sense, i.e. trim direction w.r.t. the face
                 if (trimIdx > -1)
                 {
+                    // Construct BRep trim loop (outer: ccw, inner: cw)
+                    ON_BrepLoop &brepLoop = brep->NewLoop(ON_BrepLoop::outer, brep->m_F[0]);
+
                     /*
-                    OpenNURBS requires a mapping of of 2D trim curve to 3D edge curve and the documentation says ON_BrepFace::Pushup()
-                    should do the work. However, that method does not exist in this version of the OpenNURBS library. Future versions
-                    of json2on may come with a fix but there is a very high possibility to wait OpenNURBS developers to fix this issue.
+                    TO-DO:
+                    1. Construct 3D curve and append to m_C3 (ON_Surface::Pushup method is missing)
+                    2. Evaluate start and end vertices of the 3D curve, then create the vertices: ON_Brep::NewVertex
+                    3. Create the edge: ON_Brep::NewEdge
+                    4. Create a new trim using the loop and the edge
                     */
 
-                    // Add trim curve to the BRep object
-                    ON_BrepTrim &brepTrim = brep->NewTrim(trimIdx);
-
                     // Update trim sense
-                    brepTrim.m_bRev3d = (trim.isMember("reversed")) ? !trim["reversed"].asBool() : true;
+                    bool bRev3d = (trim.isMember("reversed")) ? !trim["reversed"].asBool() : true;
                 }
             }
             // Set necessary trim flags
