@@ -414,8 +414,15 @@ void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
     // Each surface (and the trim curves) should belong to a BRep object
     brep = ON_Brep::New();
 
-    // Add surface to the BRep object
-    brep->Create(nurbsSurface);
+    // Create a BRep object from the NURBS surface
+    if (!brep->Create(nurbsSurface))
+    {
+        delete nurbsSurface;
+        delete brep;
+        nurbsSurface = nullptr;
+        brep = nullptr;
+        return;
+    }
 
     // Process trims
     if (data.isMember("trims"))
