@@ -450,29 +450,66 @@ void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
                     continue;
 
                 // Add trim curve to the BRep object
-                int trimIdx = brep->AddTrimCurve(trimCurve);
+                int t2i = brep->AddTrimCurve(trimCurve);
                 // If trim is valid, add trim sense, i.e. trim direction w.r.t. the face
-                if (trimIdx > -1)
+                if (t2i > -1)
                 {
+                    // Get the surface
+                    ON_Surface *surf = brep->m_S[0];
+
+                    // Get domain of the 2-dimensional trim curve
+                    double t0, t1;
+                    trimCurve->GetDomain(&t0, &t1);
+
+                    // Construct 3-dimensional mapping of the trim curve
+                    // ON_Surface::Pushup method is missing in the free version of OpenNURBS
+                    double t = 0.0;
+                    double delta = 0.01;
+                    ON_3dPointArray eptArray;
+                    ON_SimpleArray<double> paramsArray;
+                    while (t <= t1)
+                    {
+                        ON_3dPoint uv;
+                        trimCurve->EvPoint(t, uv);
+                        ON_3dPoint ept;
+                        surf->EvPoint(uv.x, uv.y, ept);
+                        eptArray.Append(ept);
+                        paramsArray.Append(t);
+                        t += delta;
+                    }
+                    ON_PolylineCurve trimCurve3d(eptArray, paramsArray);
+                    ON_NurbsCurve *trimCurve3dNurbs = trimCurve3d.NurbsCurve(nullptr);
+
+                    // Append mapping to the 3-dimensional curve array
+                    int t3i = brep->AddEdgeCurve(trimCurve3dNurbs);
+
+                    // Construct start and end vertices of the 3-dimensional edge
+                    ON_BrepVertex &edgeStart = brep->NewVertex(trimCurve3dNurbs->PointAtStart(), 0.0);
+                    ON_BrepVertex &edgeEnd = brep->NewVertex(trimCurve3dNurbs->PointAtEnd(), 0.0);
+
+                    // Construct BRep edge
+                    ON_BrepEdge &edge = brep->NewEdge(edgeStart, edgeEnd, t3i);
+
                     // Construct BRep trim loop (outer: ccw, inner: cw)
-                    ON_BrepLoop &brepLoop = brep->NewLoop(ON_BrepLoop::outer, brep->m_F[0]);
+                    ON_BrepLoop &loop = brep->NewLoop(ON_BrepLoop::outer, brep->m_F[0]);
 
-                    /*
-                    TO-DO:
-                    1. Construct 3D curve and append to m_C3 (ON_Surface::Pushup method is missing)
-                    2. Evaluate start and end vertices of the 3D curve, then create the vertices: ON_Brep::NewVertex
-                    3. Create the edge: ON_Brep::NewEdge
-                    4. Create a new trim using the loop and the edge
-                    */
-
-                    // Update trim sense
+                    // Find trim sense
                     bool bRev3d = (trim.isMember("reversed")) ? !trim["reversed"].asBool() : true;
+
+                    // Construct BRep trim
+                    ON_BrepTrim &trim = brep->NewTrim(edge, bRev3d, loop, t2i);
                 }
             }
             // Set necessary trim flags
-            brep->SetTolerancesBoxesAndFlags();
+            //brep->SetTolerancesBoxesAndFlags();
         }
     }
+
+    // Check if the BRep is valid
+    ON_TextLog logger;
+    bool isValidBrep = brep->IsValid(&logger);
+    if (!isValidBrep)
+        brep->Destroy();
 }
 
 bool checkLinearBoundaryTrim(ON_NurbsCurve *trimCurve)
