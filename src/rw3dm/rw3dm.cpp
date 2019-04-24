@@ -365,7 +365,7 @@ void constructCurveData(Json::Value &data, Config &cfg, ON_NurbsCurve *&nurbsCur
         ON_3dPoint cpt(cptData[0].asDouble(), cptData[1].asDouble(), (dimension == 2) ? 0.0 : cptData[2].asDouble());
         nurbsCurve->SetCV(idx, cpt);
         if (ctrlpts.isMember("weights"))
-            nurbsCurve->SetWeight(idx, ctrlpts["weights"].asDouble());
+            nurbsCurve->SetWeight(idx, ctrlpts["weights"][idx].asDouble());
     }
 }
 
