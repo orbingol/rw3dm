@@ -371,6 +371,9 @@ void constructCurveData(Json::Value &data, Config &cfg, ON_NurbsCurve *&nurbsCur
 
 void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
 {
+    // Tolerance
+    double tolerance = 0.1;
+
     // Control points array
     Json::Value ctrlpts = data["control_points"];
 
@@ -464,7 +467,7 @@ void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
                     // Construct 3-dimensional mapping of the trim curve
                     // ON_Surface::Pushup method is missing in the free version of OpenNURBS
                     double t = 0.0;
-                    double delta = 0.01;
+                    double delta = 0.1;
                     ON_3dPointArray eptArray;
                     ON_SimpleArray<double> paramsArray;
                     while (t <= t1)
@@ -478,30 +481,27 @@ void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
                         t += delta;
                     }
                     ON_PolylineCurve trimCurve3d(eptArray, paramsArray);
-                    ON_NurbsCurve *trimCurve3dNurbs = trimCurve3d.NurbsCurve(nullptr);
+                    ON_NurbsCurve *trimCurve3dNurbs = trimCurve3d.NurbsCurve(nullptr, tolerance);
 
                     // Append mapping to the 3-dimensional curve array
                     int t3i = brep->AddEdgeCurve(trimCurve3dNurbs);
 
                     // Construct start and end vertices of the 3-dimensional edge
-                    ON_BrepVertex &edgeStart = brep->NewVertex(trimCurve3dNurbs->PointAtStart(), 0.0);
-                    ON_BrepVertex &edgeEnd = brep->NewVertex(trimCurve3dNurbs->PointAtEnd(), 0.0);
+                    ON_BrepVertex &edgeStart = brep->NewVertex(trimCurve3dNurbs->PointAtStart(), tolerance);
+                    ON_BrepVertex &edgeEnd = brep->NewVertex(trimCurve3dNurbs->PointAtEnd(), tolerance);
 
                     // Construct BRep edge
                     ON_BrepEdge &edge = brep->NewEdge(edgeStart, edgeEnd, t3i);
+                    edge.m_tolerance = tolerance;
 
                     // Construct BRep trim loop (outer: ccw, inner: cw)
                     ON_BrepLoop &loop = brep->NewLoop(ON_BrepLoop::outer, brep->m_F[0]);
-
-                    // Find trim sense
                     bool bRev3d = (trim.isMember("reversed")) ? !trim["reversed"].asBool() : true;
-
-                    // Construct BRep trim
                     ON_BrepTrim &trim = brep->NewTrim(edge, bRev3d, loop, t2i);
                 }
             }
             // Set necessary trim flags
-            //brep->SetTolerancesBoxesAndFlags();
+            brep->SetTolerancesBoxesAndFlags(true);
         }
     }
 
