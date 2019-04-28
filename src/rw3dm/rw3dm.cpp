@@ -487,11 +487,10 @@ void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
                     int t3i = brep->AddEdgeCurve(trimCurve3dNurbs);
 
                     // Construct start and end vertices of the 3-dimensional edge
-                    ON_BrepVertex &edgeStart = brep->NewVertex(trimCurve3dNurbs->PointAtStart(), tolerance);
-                    ON_BrepVertex &edgeEnd = brep->NewVertex(trimCurve3dNurbs->PointAtEnd(), tolerance);
+                    ON_BrepVertex &edgeVertex = brep->NewVertex(trimCurve3dNurbs->PointAtStart(), tolerance);
 
-                    // Construct BRep edge
-                    ON_BrepEdge &edge = brep->NewEdge(edgeStart, edgeEnd, t3i);
+                    // Construct a closed BRep edge
+                    ON_BrepEdge &edge = brep->NewEdge(edgeVertex, edgeVertex, t3i);
                     edge.m_tolerance = tolerance;
 
                     // Construct BRep trim loop (outer: ccw, inner: cw)
