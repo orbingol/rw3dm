@@ -29,8 +29,6 @@ int main(int argc, char **argv)
 {
     // Print app information
     std::cout << "ON2JSON: Spline Geometry Extractor for Rhino/OpenNURBS" << std::endl;
-    std::cout << "Copyright (c) 2019 IDEA Lab at Iowa State University." << std::endl;
-    std::cout << "Licensed under the terms of the MIT License.\n" << std::endl;
 
     // File name to read
     std::string filename;
