@@ -51,7 +51,7 @@ bool on2json(std::string &fileName, Config &cfg, std::string &jsonString)
             std::cout << "[ERROR] Cannot start reading model archive from the file " << fileName << std::endl;
         return false;
     }
-    
+
     // Create JSON data object
     Json::Value dataDef;
 

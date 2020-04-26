@@ -79,32 +79,28 @@ void extractCurveData(const ON_Geometry* geometry, Config &cfg, Json::Value &dat
 
         Json::Value controlPoints;
         Json::Value points;
+        Json::Value weights;
 
-        // Get control points
+        // Get control points and weights
         for (int idx = 0; idx < nurbsCurve.CVCount(); idx++)
         {
             double *vertex = nurbsCurve.CV(idx);
+            double weight = nurbsCurve.Weight(idx);
             Json::Value point;
             for (int c = 0; c < nurbsCurve.Dimension(); c++)
             {
+                double cp = vertex[c] / weight;
                 if (paramOffset != nullptr && paramLength != nullptr && cfg.normalize())
-                    point[c] = (vertex[c] - paramOffset[c]) / paramLength[c];
+                    point[c] = (cp- paramOffset[c]) / paramLength[c];
                 else
-                    point[c] = vertex[c];
+                    point[c] = cp;
             }
             points[idx] = point;
+            weights[idx] = weight;
         }
         controlPoints["points"] = points;
+        controlPoints["weights"] = weights;
 
-        // Check if the NURBS curve is rational
-        if (nurbsCurve.IsRational())
-        {
-            Json::Value weights;
-            // Get weights
-            for (int idx = 0; idx < nurbsCurve.CVCount(); idx++)
-                weights[idx] = nurbsCurve.Weight(idx);
-            controlPoints["weights"] = weights;
-        }
         data["control_points"] = controlPoints;
     }
 }
@@ -177,8 +173,9 @@ void extractSurfaceData(const ON_Geometry* geometry, Config &cfg, Json::Value &d
 
         Json::Value controlPoints;
         Json::Value points;
+        Json::Value weights;
 
-        // Get control points
+        // Get control points adn weights
         int sizeU = nurbsSurface.CVCount(0);
         int sizeV = nurbsSurface.CVCount(1);
         for (int idxU = 0; idxU < sizeU; idxU++)
@@ -187,29 +184,19 @@ void extractSurfaceData(const ON_Geometry* geometry, Config &cfg, Json::Value &d
             {
                 unsigned int idx = idxV + (idxU * sizeV);
                 double *vertex = nurbsSurface.CV(idxU, idxV);
+                double weight = nurbsSurface.Weight(idxU, idxV);
                 Json::Value point;
                 for (int c = 0; c < nurbsSurface.Dimension(); c++)
-                    point[c] = vertex[c];
+                {
+                    point[c] = vertex[c] / weight;
+                }
                 points[idx] = point;
+                weights[idx] = weight;
             }
         }
         controlPoints["points"] = points;
+        controlPoints["weights"] = weights;
 
-        // Check if the NURBS surface is rational
-        if (nurbsSurface.IsRational())
-        {
-            Json::Value weights;
-            // Get weights
-            for (int idxU = 0; idxU < sizeU; idxU++)
-            {
-                for (int idxV = 0; idxV < sizeV; idxV++)
-                {
-                    unsigned int idx = idxV + (idxU * sizeV);
-                    weights[idx] = nurbsSurface.Weight(idxU, idxV);
-                }
-            }
-            controlPoints["weights"] = weights;
-        }
         data["size_u"] = sizeU;
         data["size_v"] = sizeV;
         data["control_points"] = controlPoints;
@@ -342,7 +329,7 @@ void constructCurveData(Json::Value &data, Config &cfg, ON_NurbsCurve *&nurbsCur
 
     // Spatial dimension
     int dimension = (data.isMember("dimension")) ? data["dimension"].asInt() : ctrlpts["points"][0].size();
- 
+
     // Number of control points
     int numCtrlpts = data["control_points"]["points"].size();
 
