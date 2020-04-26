@@ -29,7 +29,7 @@ SOFTWARE.
 int main(int argc, char **argv)
 {
     // Print app information
-    std::cout << "ON2JSON: Spline Geometry Extractor for Rhino/OpenNURBS" << std::endl;
+    std::cout << "ON2JSON: Spline Geometry Extractor for Rhino/OpenNURBS\n" << std::endl;
 
     // File name to read
     std::string filename;
