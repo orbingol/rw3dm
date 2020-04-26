@@ -4,7 +4,6 @@ project(rw3dm)
 # Generate a Visual Studio filter "CMakePredefinedTargets"
 if(MSVC)
   set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-  set(PREDEFINED_TARGETS_FOLDER "CustomTargets")
 endif()
 
 # Set install directory
