@@ -15,7 +15,7 @@ init:
   - if "%CMAKE_ARCH%"=="64" ( set arch= Win64)
   - echo %arch%
   - echo %APPVEYOR_BUILD_WORKER_IMAGE%
-  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" ( set generator="Visual Studio 15 2017%arch%" )
+  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" ( set generator="Visual Studio 15 2019%arch%" )
   - echo %generator%
 
 # Clone with submodules
@@ -36,21 +36,13 @@ pull_requests:
 # Set build environment
 environment:
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      CMAKE_ARCH: "32"
-      CMAKE_ARGS: -DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=ON
-
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      CMAKE_ARCH: "32"
-      CMAKE_ARGS: -DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=OFF
-
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      CMAKE_ARCH: "64"
-      CMAKE_ARGS: -DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=ON
-
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       CMAKE_ARCH: "64"
       CMAKE_ARGS: -DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=OFF
+
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      CMAKE_ARCH: "64"
+      CMAKE_ARGS: -DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=ON
 
 # Install required packages before the build
 install:
