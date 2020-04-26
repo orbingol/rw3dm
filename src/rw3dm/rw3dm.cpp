@@ -106,6 +106,91 @@ void extractCurveData(const ON_Geometry* geometry, Config &cfg, Json::Value &dat
     }
 }
 
+void extractNurbsSurfaceData(const ON_NurbsSurface* nurbsSurface, Config& cfg, Json::Value& data) {
+    // Get dimension
+    data["dimension"] = nurbsSurface->Dimension();
+
+    // Get rational
+    data["rational"] = nurbsSurface->IsRational();
+
+    // Get degrees
+    data["degree_u"] = nurbsSurface->Degree(0);
+    data["degree_v"] = nurbsSurface->Degree(1);
+
+    // Get knot vectors
+    Json::Value knotVectorU;
+    if (cfg.normalize())
+    {
+        // Get parametric domain
+        double* dU = nurbsSurface->Domain(0).m_t;
+
+        // Normalize knot vector
+        knotVectorU.append((nurbsSurface->SuperfluousKnot(0, false) - dU[0]) / (dU[1] - dU[0]));
+        for (int idx = 0; idx < nurbsSurface->KnotCount(0); idx++)
+            knotVectorU[idx + 1] = (nurbsSurface->Knot(0, idx) - dU[0]) / (dU[1] - dU[0]);
+        knotVectorU.append((nurbsSurface->SuperfluousKnot(0, true) - dU[0]) / (dU[1] - dU[0]));
+    }
+    else
+    {
+        knotVectorU.append(nurbsSurface->SuperfluousKnot(0, false));
+        for (int idx = 0; idx < nurbsSurface->KnotCount(0); idx++)
+            knotVectorU[idx + 1] = nurbsSurface->Knot(0, idx);
+        knotVectorU.append(nurbsSurface->SuperfluousKnot(0, true));
+    }
+    data["knotvector_u"] = knotVectorU;
+
+    Json::Value knotVectorV;
+    if (cfg.normalize())
+    {
+        // Get parametric domain
+        double* dV = nurbsSurface->Domain(1).m_t;
+
+        // Normalize knot vector
+        knotVectorV.append((nurbsSurface->SuperfluousKnot(1, false) - dV[0]) / (dV[1] - dV[0]));
+        for (int idx = 0; idx < nurbsSurface->KnotCount(1); idx++)
+            knotVectorV[idx + 1] = (nurbsSurface->Knot(1, idx) - dV[0]) / (dV[1] - dV[0]);
+        knotVectorV.append((nurbsSurface->SuperfluousKnot(1, true) - dV[0]) / (dV[1] - dV[0]));
+    }
+    else
+    {
+        knotVectorV.append(nurbsSurface->SuperfluousKnot(1, false));
+        for (int idx = 0; idx < nurbsSurface->KnotCount(1); idx++)
+            knotVectorV[idx + 1] = nurbsSurface->Knot(1, idx);
+        knotVectorV.append(nurbsSurface->SuperfluousKnot(1, true));
+    }
+    data["knotvector_v"] = knotVectorV;
+
+    Json::Value controlPoints;
+    Json::Value points;
+    Json::Value weights;
+
+    // Get control points adn weights
+    int sizeU = nurbsSurface->CVCount(0);
+    int sizeV = nurbsSurface->CVCount(1);
+    for (int idxU = 0; idxU < sizeU; idxU++)
+    {
+        for (int idxV = 0; idxV < sizeV; idxV++)
+        {
+            unsigned int idx = idxV + (idxU * sizeV);
+            double* vertex = nurbsSurface->CV(idxU, idxV);
+            double weight = nurbsSurface->Weight(idxU, idxV);
+            Json::Value point;
+            for (int c = 0; c < nurbsSurface->Dimension(); c++)
+            {
+                point[c] = vertex[c] / weight;
+            }
+            points[idx] = point;
+            weights[idx] = weight;
+        }
+    }
+    controlPoints["points"] = points;
+    controlPoints["weights"] = weights;
+
+    data["size_u"] = sizeU;
+    data["size_v"] = sizeV;
+    data["control_points"] = controlPoints;
+}
+
 void extractSurfaceData(const ON_Geometry* geometry, Config &cfg, Json::Value &data)
 {
     // We expect a surface object
@@ -119,88 +204,8 @@ void extractSurfaceData(const ON_Geometry* geometry, Config &cfg, Json::Value &d
     ON_NurbsSurface nurbsSurface;
     if (surface->NurbsSurface(&nurbsSurface))
     {
-        // Get dimension
-        data["dimension"] = nurbsSurface.Dimension();
-
-        // Get rational
-        data["rational"] = nurbsSurface.IsRational();
-
-        // Get degrees
-        data["degree_u"] = nurbsSurface.Degree(0);
-        data["degree_v"] = nurbsSurface.Degree(1);
-
-        // Get knot vectors
-        Json::Value knotVectorU;
-        if (cfg.normalize())
-        {
-            // Get parametric domain
-            double *dU = nurbsSurface.Domain(0).m_t;
-
-            // Normalize knot vector
-            knotVectorU.append((nurbsSurface.SuperfluousKnot(0, false) - dU[0]) / (dU[1] - dU[0]));
-            for (int idx = 0; idx < nurbsSurface.KnotCount(0); idx++)
-                knotVectorU[idx + 1] = (nurbsSurface.Knot(0, idx) - dU[0]) / (dU[1] - dU[0]);
-            knotVectorU.append((nurbsSurface.SuperfluousKnot(0, true) - dU[0]) / (dU[1] - dU[0]));
-        }
-        else
-        {
-            knotVectorU.append(nurbsSurface.SuperfluousKnot(0, false));
-            for (int idx = 0; idx < nurbsSurface.KnotCount(0); idx++)
-                knotVectorU[idx + 1] = nurbsSurface.Knot(0, idx);
-            knotVectorU.append(nurbsSurface.SuperfluousKnot(0, true));
-        }
-        data["knotvector_u"] = knotVectorU;
-
-        Json::Value knotVectorV;
-        if (cfg.normalize())
-        {
-            // Get parametric domain
-            double *dV = nurbsSurface.Domain(1).m_t;
-
-            // Normalize knot vector
-            knotVectorV.append((nurbsSurface.SuperfluousKnot(1, false) - dV[0]) / (dV[1] - dV[0]));
-            for (int idx = 0; idx < nurbsSurface.KnotCount(1); idx++)
-                knotVectorV[idx + 1] = (nurbsSurface.Knot(1, idx) - dV[0]) / (dV[1] - dV[0]);
-            knotVectorV.append((nurbsSurface.SuperfluousKnot(1, true) - dV[0]) / (dV[1] - dV[0]));
-        }
-        else
-        {
-            knotVectorV.append(nurbsSurface.SuperfluousKnot(1, false));
-            for (int idx = 0; idx < nurbsSurface.KnotCount(1); idx++)
-                knotVectorV[idx + 1] = nurbsSurface.Knot(1, idx);
-            knotVectorV.append(nurbsSurface.SuperfluousKnot(1, true));
-        }
-        data["knotvector_v"] = knotVectorV;
-
-        Json::Value controlPoints;
-        Json::Value points;
-        Json::Value weights;
-
-        // Get control points adn weights
-        int sizeU = nurbsSurface.CVCount(0);
-        int sizeV = nurbsSurface.CVCount(1);
-        for (int idxU = 0; idxU < sizeU; idxU++)
-        {
-            for (int idxV = 0; idxV < sizeV; idxV++)
-            {
-                unsigned int idx = idxV + (idxU * sizeV);
-                double *vertex = nurbsSurface.CV(idxU, idxV);
-                double weight = nurbsSurface.Weight(idxU, idxV);
-                Json::Value point;
-                for (int c = 0; c < nurbsSurface.Dimension(); c++)
-                {
-                    point[c] = vertex[c] / weight;
-                }
-                points[idx] = point;
-                weights[idx] = weight;
-            }
-        }
-        controlPoints["points"] = points;
-        controlPoints["weights"] = weights;
-
-        data["size_u"] = sizeU;
-        data["size_v"] = sizeV;
-        data["control_points"] = controlPoints;
+        // Extract NURBS surface data
+        extractNurbsSurfaceData(&nurbsSurface, cfg, data);
     }
 }
 

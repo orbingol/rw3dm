@@ -33,6 +33,7 @@ void finalizeRwExt();
 
 // Geometry extraction (3DM -> geomdl)
 void extractCurveData(const ON_Geometry *, Config &, Json::Value &, double * = nullptr, double * = nullptr);
+void extractNurbsSurfaceData(const ON_NurbsSurface *, Config &, Json::Value &);
 void extractSurfaceData(const ON_Geometry *, Config &, Json::Value &);
 void extractBrepData(const ON_Geometry *, Config &, Json::Value &);
 
