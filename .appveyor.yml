@@ -9,15 +9,6 @@
 # Build version
 version: Build {build}
 
-# Initialize CI
-init:
-  - set arch=
-  - if "%CMAKE_ARCH%"=="64" ( set arch= Win64)
-  - echo %arch%
-  - echo %APPVEYOR_BUILD_WORKER_IMAGE%
-  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" ( set generator="Visual Studio 15 2017%arch%" )
-  - echo %generator%
-
 # Clone with submodules
 clone_script:
 - cmd: git clone -q --recursive --branch=%APPVEYOR_REPO_BRANCH% https://github.com/%APPVEYOR_REPO_NAME%.git %APPVEYOR_BUILD_FOLDER%
@@ -36,21 +27,11 @@ pull_requests:
 # Set build environment
 environment:
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      CMAKE_ARCH: "32"
-      CMAKE_ARGS: -DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=ON
-
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      CMAKE_ARCH: "32"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       CMAKE_ARGS: -DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=OFF
 
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      CMAKE_ARCH: "64"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       CMAKE_ARGS: -DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=ON
-
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      CMAKE_ARCH: "64"
-      CMAKE_ARGS: -DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=OFF
 
 # Install required packages before the build
 install:
@@ -69,7 +50,7 @@ before_build:
   - cmd: mkdir build
   - cmd: cd build
   - cmd: cmake --version
-  - cmd: cmake .. -G %generator% %CMAKE_ARGS%
+  - cmd: cmake .. -G "Visual Studio 16 2019" -A x64 %CMAKE_ARGS%
 
 # Compile the package
 build_script:
