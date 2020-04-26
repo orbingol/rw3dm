@@ -60,7 +60,7 @@ before_build:
   - cmd: mkdir build
   - cmd: cd build
   - cmd: cmake --version
-  - cmd: cmake .. -G %generator% -A %arch% %CMAKE_ARGS%
+  - cmd: cmake .. -G "%generator%" -A %arch% %CMAKE_ARGS%
 
 # Compile the package
 build_script:
