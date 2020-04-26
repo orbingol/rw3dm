@@ -209,6 +209,24 @@ void extractSurfaceData(const ON_Geometry* geometry, Config &cfg, Json::Value &d
     }
 }
 
+void extractExtrusionData(const ON_Geometry* geometry, Config& cfg, Json::Value& data)
+{
+    // We expect an extrusion object
+    if (ON::object_type::extrusion_object != geometry->ObjectType())
+        return;
+
+    // We know that "geometry" is an extrusion object
+    ON_Extrusion* extr = (ON_Extrusion*)geometry;
+
+    // Try to get the NURBS surface form of the extrusion object
+    ON_NurbsSurface nurbsSurface;
+    if (extr->NurbsSurface(&nurbsSurface))
+    {
+        // Extract NURBS surface data
+        extractNurbsSurfaceData(&nurbsSurface, cfg, data);
+    }
+}
+
 void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data)
 {
     // We expect a BRep object

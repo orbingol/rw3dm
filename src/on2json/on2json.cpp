@@ -83,6 +83,9 @@ bool on2json(std::string &fileName, Config &cfg, std::string &jsonString)
                     case ON::brep_object:
                         extractBrepData(geometry, cfg, data);
                         break;
+                    case ON::extrusion_object:
+                        extractExtrusionData(geometry, cfg, data);
+                        break;
                     }
                 }
                 // Only add to the array if JSON output is not empty

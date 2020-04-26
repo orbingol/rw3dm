@@ -36,6 +36,7 @@ void extractCurveData(const ON_Geometry *, Config &, Json::Value &, double * = n
 void extractNurbsSurfaceData(const ON_NurbsSurface *, Config &, Json::Value &);
 void extractSurfaceData(const ON_Geometry *, Config &, Json::Value &);
 void extractBrepData(const ON_Geometry *, Config &, Json::Value &);
+void extractExtrusionData(const ON_Geometry*, Config&, Json::Value&);
 
 // Geometry conversion (geomdl -> 3DM)
 void constructCurveData(Json::Value &, Config &, ON_NurbsCurve *&);
