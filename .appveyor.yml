@@ -9,14 +9,6 @@
 # Build version
 version: Build {build}
 
-# Initialize CI
-init:
-  - set arch=Win32
-  - if "%CMAKE_ARCH%"=="64" ( set arch=x64)
-  - set generator=%APPVEYOR_BUILD_WORKER_IMAGE%
-  - echo %generator%
-  - echo %arch%
-
 # Clone with submodules
 clone_script:
 - cmd: git clone -q --recursive --branch=%APPVEYOR_REPO_BRANCH% https://github.com/%APPVEYOR_REPO_NAME%.git %APPVEYOR_BUILD_FOLDER%
@@ -36,11 +28,9 @@ pull_requests:
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      CMAKE_ARCH: "64"
       CMAKE_ARGS: -DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=OFF
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      CMAKE_ARCH: "64"
       CMAKE_ARGS: -DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=ON
 
 # Install required packages before the build
@@ -60,7 +50,7 @@ before_build:
   - cmd: mkdir build
   - cmd: cd build
   - cmd: cmake --version
-  - cmd: cmake .. -G "%generator%" -A %arch% %CMAKE_ARGS%
+  - cmd: cmake .. -G "Visual Studio 16 2019" -A x64 %CMAKE_ARGS%
 
 # Compile the package
 build_script:
