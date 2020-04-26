@@ -49,12 +49,24 @@ struct Config {
     };
 
     // Methods
-    bool show_config();
-    bool silent();
-    bool normalize();
-    bool trims();
-    bool sense();
-    bool extract_curves();
+    bool show_config() {
+        return bool(std::atoi(params.at("show_config").first.c_str()));
+    };
+    bool silent() {
+        return bool(std::atoi(params.at("silent").first.c_str()));
+    };
+    bool normalize() {
+        return bool(std::atoi(params.at("normalize").first.c_str()));
+    };
+    bool trims() {
+        return bool(std::atoi(params.at("trims").first.c_str()));
+    };
+    bool sense() {
+        return bool(std::atoi(params.at("sense").first.c_str()));
+    };
+    bool extract_curves() {
+        return bool(std::atoi(params.at("extract_curves").first.c_str()));
+    };
 };
 
 // Function prototypes
