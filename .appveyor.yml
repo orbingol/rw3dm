@@ -11,12 +11,11 @@ version: Build {build}
 
 # Initialize CI
 init:
-  - set arch=
-  - if "%CMAKE_ARCH%"=="64" ( set arch= Win64)
-  - echo %arch%
-  - echo %APPVEYOR_BUILD_WORKER_IMAGE%
-  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" ( set generator="Visual Studio 15 2019%arch%" )
+  - set arch=Win32
+  - if "%CMAKE_ARCH%"=="64" ( set arch=x64)
+  - set generator=%APPVEYOR_BUILD_WORKER_IMAGE%
   - echo %generator%
+  - echo %arch%
 
 # Clone with submodules
 clone_script:
@@ -61,7 +60,7 @@ before_build:
   - cmd: mkdir build
   - cmd: cd build
   - cmd: cmake --version
-  - cmd: cmake .. -G %generator% %CMAKE_ARGS%
+  - cmd: cmake .. -G %generator% -A %arch% %CMAKE_ARGS%
 
 # Compile the package
 build_script:
