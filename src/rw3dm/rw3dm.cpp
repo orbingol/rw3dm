@@ -383,7 +383,7 @@ void constructCurveData(Json::Value &data, Config &cfg, ON_NurbsCurve *&nurbsCur
 void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
 {
     // Tolerance
-    double tolerance = 0.1;
+    double tolerance = 10e-7;
 
     // Control points array
     Json::Value ctrlpts = data["control_points"];
