@@ -476,21 +476,29 @@ void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
                     trimCurve->GetDomain(&t0, &t1);
 
                     // Construct 3-dimensional mapping of the trim curve
-                    // ON_Surface::Pushup method is missing in the free version of OpenNURBS
-                    double t = 0.0;
-                    double delta = 0.1;
+                    double t = t0;
+                    double delta = 0.001;
                     ON_3dPointArray eptArray;
                     ON_SimpleArray<double> paramsArray;
-                    while (t <= t1)
+                    ON_3dPoint uv;
+                    ON_3dPoint ept;
+                    // Skip final parametric position to cheat floating point error
+                    while (t < t1)
                     {
-                        ON_3dPoint uv;
                         trimCurve->EvPoint(t, uv);
-                        ON_3dPoint ept;
                         surf->EvPoint(uv.x, uv.y, ept);
                         eptArray.Append(ept);
                         paramsArray.Append(t);
                         t += delta;
                     }
+
+                    // Evaluate the last parametric position separately
+                    // to make sure last curve point == first curve point
+                    trimCurve->EvPoint(t1, uv);
+                    surf->EvPoint(uv.x, uv.y, ept);
+                    eptArray.Append(ept);
+                    paramsArray.Append(t1);
+
                     ON_PolylineCurve trimCurve3d(eptArray, paramsArray);
                     ON_NurbsCurve *trimCurve3dNurbs = trimCurve3d.NurbsCurve(nullptr, tolerance);
 
