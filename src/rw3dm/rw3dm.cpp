@@ -499,14 +499,15 @@ void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
 
                     // Construct start and end vertices of the 3-dimensional edge
                     ON_BrepVertex& edgeVertexStart = brep->NewVertex(trimCurve3dNurbs->PointAtStart(), tolerance);
-                    ON_BrepVertex& edgeVertexEnd = brep->NewVertex(trimCurve3dNurbs->PointAtEnd(), tolerance);
+                    //ON_BrepVertex& edgeVertexEnd = brep->NewVertex(trimCurve3dNurbs->PointAtEnd(), tolerance);
 
                     // Construct a closed BRep edge
-                    ON_BrepEdge &edge = brep->NewEdge(edgeVertexStart, edgeVertexEnd, t3i);
+                    //ON_BrepEdge &edge = brep->NewEdge(edgeVertexStart, edgeVertexEnd, t3i);
+                    ON_BrepEdge& edge = brep->NewEdge(edgeVertexStart, edgeVertexStart, t3i);
                     edge.m_tolerance = tolerance;
 
                     // Construct BRep trim loop (outer: ccw, inner: cw)
-                    ON_BrepLoop &loop = brep->NewLoop(ON_BrepLoop::outer, brep->m_F[0]);
+                    ON_BrepLoop &loop = brep->NewLoop(ON_BrepLoop::inner, brep->m_F[0]);
 
                     // Construct trim
                     bool bRev3d = (trim.isMember("reversed")) ? !trim["reversed"].asBool() : true;
