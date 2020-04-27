@@ -507,8 +507,14 @@ void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
 
                     // Construct BRep trim loop (outer: ccw, inner: cw)
                     ON_BrepLoop &loop = brep->NewLoop(ON_BrepLoop::outer, brep->m_F[0]);
+
+                    // Construct trim
                     bool bRev3d = (trim.isMember("reversed")) ? !trim["reversed"].asBool() : true;
                     ON_BrepTrim &trim = brep->NewTrim(edge, bRev3d, loop, t2i);
+
+                    // Set trim tolerance
+                    trim.m_tolerance[0] = tolerance;
+                    trim.m_tolerance[1] = tolerance;
                 }
             }
             // Set necessary trim flags
