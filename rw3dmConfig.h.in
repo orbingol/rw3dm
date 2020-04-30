@@ -1,0 +1,9 @@
+// Configured options and settings for rw3dm
+#ifndef RW3DM_CONFIG_H
+#define RW3DM_CONFIG_H
+
+#define RW3DM_VERSION_MAJOR @rw3dm_VERSION_MAJOR@
+#define RW3DM_VERSION_MINOR @rw3dm_VERSION_MINOR@
+#define RW3DM_VERSION_PATCH @rw3dm_VERSION_PATCH@
+
+#endif /* RW3DM_CONFIG_H */

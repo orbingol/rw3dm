@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8.2)
-project(rw3dm)
+project(rw3dm VERSION 2.1.0)
 
 # Generate a Visual Studio filter "CMakePredefinedTargets"
 if(MSVC)
@@ -20,6 +20,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
+
+# Configure version header file
+configure_file(rw3dmConfig.h.in rw3dmConfig.h)
 
 # Add 3rd party libraries
 add_subdirectory(3rdparty)
@@ -47,7 +50,11 @@ set(SOURCE_FILES_RW3DMLIB
 )
 add_library(rw3dm STATIC ${SOURCE_FILES_RW3DMLIB})
 target_link_libraries(rw3dm PRIVATE jsoncpp opennurbs)
-target_include_directories(rw3dm PUBLIC "${CMAKE_CURRENT_LIST_DIR}/src/rw3dm")
+target_include_directories(rw3dm
+    PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/src/rw3dm"
+        "${PROJECT_BINARY_DIR}"
+)
 
 if(RW3DM_BUILD_ON2JSON)
   # Set source files for ON2JSON
