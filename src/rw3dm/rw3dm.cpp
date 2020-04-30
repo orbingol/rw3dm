@@ -488,7 +488,7 @@ void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
                         trimCurve->EvPoint(t, uv);
                         surf->EvPoint(uv.x, uv.y, ept);
                         eptArray.Append(ept);
-                        paramsArray.Append(t);
+                        //paramsArray.Append(t);
                         t += delta;
                     }
 
@@ -497,17 +497,17 @@ void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
                     trimCurve->EvPoint(t1, uv);
                     surf->EvPoint(uv.x, uv.y, ept);
                     eptArray.Append(ept);
-                    paramsArray.Append(t1);
+                    //paramsArray.Append(t1);
 
-                    ON_PolylineCurve trimCurve3d(eptArray, paramsArray);
-                    ON_NurbsCurve *trimCurve3dNurbs = trimCurve3d.NurbsCurve(nullptr, tolerance);
+                    ON_PolylineCurve* trimCurve3d = new ON_PolylineCurve(eptArray, paramsArray);
+                    //ON_NurbsCurve *trimCurve3dNurbs = trimCurve3d.NurbsCurve(nullptr, tolerance);
 
                     // Append mapping to the 3-dimensional curve array
-                    int t3i = brep->AddEdgeCurve(trimCurve3dNurbs);
+                    int t3i = brep->AddEdgeCurve(trimCurve3d);
 
                     // Construct start and end vertices of the 3-dimensional edge
-                    ON_BrepVertex& edgeVertexStart = brep->NewVertex(trimCurve3dNurbs->PointAtStart(), tolerance);
-                    //ON_BrepVertex& edgeVertexEnd = brep->NewVertex(trimCurve3dNurbs->PointAtEnd(), tolerance);
+                    ON_BrepVertex& edgeVertexStart = brep->NewVertex(trimCurve3d->PointAtStart(), tolerance);
+                    //ON_BrepVertex& edgeVertexEnd = brep->NewVertex(trimCurve3d->PointAtEnd(), tolerance);
 
                     // Construct a closed BRep edge
                     //ON_BrepEdge &edge = brep->NewEdge(edgeVertexStart, edgeVertexEnd, t3i);
