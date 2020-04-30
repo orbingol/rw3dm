@@ -1,5 +1,6 @@
 /*
-Copyright (c) 2019 Onur Rauf Bingol
+Copyright (c) 2018-2019 IDEA Lab, Iowa State University
+Copyright (c) 2018-2020 Onur Rauf Bingol
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +35,9 @@ SOFTWARE.
 #include <cstddef>
 #include <cstdio>
 #include <cmath>
+
+// rw3dm configuration
+#include "rw3dmConfig.h"
 
 
 // Application configuration
