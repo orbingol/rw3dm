@@ -520,6 +520,7 @@ void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
                     // Construct trim
                     bool bRev3d = (trim.isMember("reversed")) ? !trim["reversed"].asBool() : true;
                     ON_BrepTrim &trim = brep->NewTrim(edge, bRev3d, loop, t2i);
+                    trim.m_type = ON_BrepTrim::boundary;
 
                     // Set trim tolerance
                     trim.m_tolerance[0] = tolerance;
