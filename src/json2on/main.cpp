@@ -28,7 +28,15 @@ SOFTWARE.
 int main(int argc, char **argv)
 {
     // Print app information
-    std::cout << "JSON2ON: Spline Geometry Converter for Rhino/OpenNURBS\n" << std::endl;
+    std::cout << "JSON2ON: Geometry Converter for Rhino/OpenNURBS"
+        << " (RW3DM v" << RW3DM_VERSION_MAJOR << "."
+        << RW3DM_VERSION_MINOR << "."
+        << RW3DM_VERSION_PATCH << ")"
+        << std::endl;
+    std::cout << "OpenNURBS version: "
+        << ON::VersionQuartetAsString()
+        << std::endl;
+    std::cout << std::endl;
 
     // File name to read
     std::string filename;
