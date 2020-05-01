@@ -23,6 +23,8 @@ jobs:
       run: cmake ../ -G "Visual Studio 16 2019" -A x64 -DRW3DM_BUILD_ON2JSON=OFF -DRW3DM_BUILD_JSON2ON=OFF -DRW3DM_BUILD_ON_DLL=ON
       working-directory: ./build
     - name: make
-      run: make
+      run: cmake --build . --config Release --target opennurbs
+      working-directory: ./build
     - name: make install
-      run: make install
+      run: cmake --build . --config Release --target install
+      working-directory: ./build
