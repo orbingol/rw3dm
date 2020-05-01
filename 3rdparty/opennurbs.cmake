@@ -13,13 +13,10 @@ set(ON_COMP_DIRECTIVES
 )
 
 # OpenNURBS source
-file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_gl.cpp" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_gl.skip")
-file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp932.cpp" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp932.skip")
-file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp949.cpp" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp949.skip")
 file(GLOB ON_SRC "${CMAKE_CURRENT_LIST_DIR}/opennurbs/*.h" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/*.cpp")
-file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_gl.skip" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_gl.cpp")
-file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp932.skip" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp932.cpp")
-file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp949.skip" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp949.cpp")
+list(REMOVE_ITEM ON_SRC "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_gl.cpp")
+list(REMOVE_ITEM ON_SRC "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp932.cpp")
+list(REMOVE_ITEM ON_SRC "${CMAKE_CURRENT_LIST_DIR}/opennurbs/opennurbs_unicode_cp949.cpp")
 set(ON_SRC_ALL ${ON_SRC})
 
 # zlib source (included with OpenNURBS)
@@ -50,9 +47,8 @@ endif()
 # OpenNURBS fixes for Linux
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   # Include UUID source (included with OpenNURBS)
-  file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.c" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.skip")
   file(GLOB ON_UUID_SRC "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/*.h" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/*.c")
-  file(RENAME "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.skip" "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.c")
+  list(REMOVE_ITEM ON_UUID_SRC "${CMAKE_CURRENT_LIST_DIR}/opennurbs/android_uuid/gen_uuid_nt.c")
 
   # Update compiler directives
   set(ON_COMP_DIRECTIVES
