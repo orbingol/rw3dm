@@ -16,11 +16,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: make build dir
-      run: mkdir build
-    - name: change dir
-      run: cd build
+      run: mkdir build; cd build
     - name: run cmake
-      run: cmake rw3dm/ -G "Visual Studio 16 2019" -A x64 -DRW3DM_BUILD_ON2JSON=OFF -DRW3DM_BUILD_JSON2ON=OFF -DRW3DM_BUILD_ON_DLL=ON
+      run: cmake ../ -G "Visual Studio 16 2019" -A x64 -DRW3DM_BUILD_ON2JSON=OFF -DRW3DM_BUILD_JSON2ON=OFF -DRW3DM_BUILD_ON_DLL=ON
+      working-directory: ./build
     - name: make
       run: make
     - name: make install
