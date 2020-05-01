@@ -1,0 +1,43 @@
+name: Build RW3DM Tools
+
+on:
+  push:
+    branches:
+      - master
+      - workflows-testing
+  pull_request:
+    branches:
+      - master
+      - devmaster
+
+jobs:
+  build_release:
+    runs-on: windows-latest
+    steps:
+    - name: checkout repository
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: make build dir
+      run: mkdir build
+    - name: run cmake
+      run: cmake ../ -G "Visual Studio 16 2019" -A x64 -DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=OFF
+      working-directory: ./build
+    - name: make on2json
+      run: cmake --build . --config Release --target on2json
+    - name: make json2on
+      run: cmake --build . --config Release --target json2on
+      working-directory: ./build
+    - name: make install
+      run: cmake --build . --config Release --target install
+      working-directory: ./build
+    - name: upload on2json
+      uses: actions/upload-artifact@v2
+      with:
+        name: on2json_win-x64
+        path: ./build/install/on2json.exe
+    - name: upload json2on
+      uses: actions/upload-artifact@v2
+      with:
+        name: json2on_win-x64
+        path: ./build/install/json2on.exe
