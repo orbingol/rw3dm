@@ -25,6 +25,7 @@ jobs:
       working-directory: ./build
     - name: make on2json
       run: cmake --build . --config Release --target on2json
+      working-directory: ./build
     - name: make json2on
       run: cmake --build . --config Release --target json2on
       working-directory: ./build
