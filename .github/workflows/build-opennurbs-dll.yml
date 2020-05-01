@@ -22,5 +22,7 @@ jobs:
       working-directory: ./build
     - name: make
       run: make
+      working-directory: ./build
     - name: make install
       run: make install
+      working-directory: ./build
