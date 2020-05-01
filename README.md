@@ -1,6 +1,6 @@
 # RW3DM - Rhino Extensions for NURBS-Python (geomdl)
 
-[![Build status](https://ci.appveyor.com/api/projects/status/gdawoy927oeex1dj?svg=true)](https://ci.appveyor.com/project/orbingol/rw3dm)
+[![Appveyor status](https://ci.appveyor.com/api/projects/status/gdawoy927oeex1dj?svg=true)](https://ci.appveyor.com/project/orbingol/rw3dm)
 
 RW3DM project provides executables for exporting and importing OpenNURBS/Rhino .3DM files in JSON format.
 It utilizes [OpenNURBS](https://github.com/mcneel/opennurbs) library for reading and writing .3DM files
@@ -11,7 +11,7 @@ and [JsonCpp](https://github.com/open-source-parsers/jsoncpp) for importing and 
 
 ### Downloading RW3DM
 
-You can download the precompiled binaries under [Releases](https://github.com/orbingol/rw3dm/releases).
+You can download the precompiled Windows 64-bit binaries under [Actions](https://github.com/orbingol/rw3dm/actions) tab.
 
 ### Compiling RW3DM
 
@@ -44,7 +44,7 @@ If you prefer to update the compiled binaries on your own, you can follow the fo
 
 #### For Windows
 
-* Visual Studio 2017 is required to compile OpenNURBS
+* Visual Studio 2017 or newer is required to compile OpenNURBS
 * Please install C++ support on Visual Studio as it is not installed by default
 * Choose **Release** as the build configuration inside Visual Studio before you compile the package
 
