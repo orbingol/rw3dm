@@ -45,5 +45,7 @@ void constructSurfaceData(Json::Value &, Config &, ON_Brep *&);
 
 // Helper functions
 bool checkLinearBoundaryTrim(ON_NurbsCurve *);
+int surfaceCvIndex(int, int, int, int);
+int volumeCvIndex(int, int, int, int, int, int);
 
 #endif /* RW3DM_H */

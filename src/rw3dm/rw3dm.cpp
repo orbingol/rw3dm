@@ -171,7 +171,7 @@ void extractNurbsSurfaceData(const ON_NurbsSurface* nurbsSurface, Config& cfg, J
     {
         for (int idxV = 0; idxV < sizeV; idxV++)
         {
-            unsigned int idx = idxV + (idxU * sizeV);
+            int idx = surfaceCvIndex(idxU, idxV, sizeU, sizeV);
             double* vertex = nurbsSurface->CV(idxU, idxV);
             double weight = nurbsSurface->Weight(idxU, idxV);
             Json::Value point;
@@ -416,7 +416,7 @@ void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
     {
         for (int idxV = 0; idxV < nurbsSurface->CVCount(1); idxV++)
         {
-            unsigned int idx = idxV + (idxU * sizeV);
+            int idx = surfaceCvIndex(idxU, idxV, sizeU, sizeV);
             Json::Value cptData = ctrlpts["points"][idx];
             ON_3dPoint cpt(cptData[0].asDouble(), cptData[1].asDouble(), cptData[2].asDouble());
             nurbsSurface->SetCV(idxU, idxV, cpt);
@@ -557,4 +557,15 @@ bool checkLinearBoundaryTrim(ON_NurbsCurve *trimCurve)
     if (trimValidateCount == 4)
         return true;
     return false;
+}
+
+
+int surfaceCvIndex(int u, int v, int size_u, int size_v)
+{
+    return v + (u * size_v);
+}
+
+int volumeCvIndex(int u, int v, int w, int size_u, int size_v, int size_w)
+{
+    return v + (size_v * (u + (size_u * w)));
 }
