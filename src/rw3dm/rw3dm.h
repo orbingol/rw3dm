@@ -43,8 +43,10 @@ void extractExtrusionData(const ON_Geometry*, Config&, Json::Value&);
 void constructCurveData(Json::Value &, Config &, ON_NurbsCurve *&);
 void constructSurfaceData(Json::Value &, Config &, ON_Brep *&);
 
-// Trims
+// Trim curve conversion (geomdl -> 3DM)
 void constructBsplineTrimCurve(Json::Value &, Config &, ON_Brep *&);
+void constructFreeformTrimCurve(Json::Value &, Config &, ON_Brep *&);
+void constructContainerTrimCurve(Json::Value &, Config &, ON_Brep *&);
 
 // Helper functions
 bool checkLinearBoundaryTrim(ON_NurbsCurve *);

@@ -448,10 +448,18 @@ void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
                 // Get trim type
                 std::string trimType = trim["type"].asString();
 
-                // Add trim curve to BRep
+                // Add trim curve to brep
                 if (trimType == "spline")
                     constructBsplineTrimCurve(trim, cfg, brep);
-
+                else if (trimType == "freeform")
+                    constructFreeformTrimCurve(trim, cfg, brep);
+                else if (trimType == "container")
+                    constructContainerTrimCurve(trim, cfg, brep);
+                else
+                {
+                    // Skip unsupported trim format
+                    continue;
+                }
             }
         }
         // Set necessary trim flags
@@ -548,6 +556,19 @@ void constructBsplineTrimCurve(Json::Value& trim, Config& cfg, ON_Brep*& brep)
         trim.m_tolerance[1] = tolerance;
     }
 }
+
+
+void constructFreeformTrimCurve(Json::Value& trim, Config& cfg, ON_Brep*& brep)
+{
+    // TO-DO
+}
+
+
+void constructContainerTrimCurve(Json::Value& trim, Config& cfg, ON_Brep*& brep)
+{
+    // TO-DO
+}
+
 
 bool checkLinearBoundaryTrim(ON_NurbsCurve *trimCurve)
 {
