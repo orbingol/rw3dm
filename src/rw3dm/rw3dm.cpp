@@ -382,9 +382,6 @@ void constructCurveData(Json::Value &data, Config &cfg, ON_NurbsCurve *&nurbsCur
 
 void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
 {
-    // Tolerance
-    double tolerance = 10e-7;
-
     // Control points array
     Json::Value ctrlpts = data["control_points"];
 
@@ -451,85 +448,14 @@ void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
                 // Get trim type
                 std::string trimType = trim["type"].asString();
 
-                // Currently, only spline trim curves are supported
-                if (trimType != "spline")
-                    continue;
+                // Add trim curve to BRep
+                if (trimType == "spline")
+                    constructBsplineTrimCurve(trim, cfg, brep);
 
-                // Construct the trim curve
-                ON_NurbsCurve *trimCurve;
-                constructCurveData(trim, cfg, trimCurve);
-
-                // Try to understand if the extracted trim curve is the edge of the surface
-                if (checkLinearBoundaryTrim(trimCurve))
-                    continue;
-
-                // Add trim curve to the BRep object
-                int t2i = brep->AddTrimCurve(trimCurve);
-                // If trim is valid, add trim sense, i.e. trim direction w.r.t. the face
-                if (t2i > -1)
-                {
-                    // Get the surface
-                    ON_Surface *surf = brep->m_S[0];
-
-                    // Get domain of the 2-dimensional trim curve
-                    double t0, t1;
-                    trimCurve->GetDomain(&t0, &t1);
-
-                    // Construct 3-dimensional mapping of the trim curve
-                    double t = t0;
-                    double delta = 0.001;
-                    ON_3dPointArray eptArray;
-                    ON_SimpleArray<double> paramsArray;
-                    ON_3dPoint uv;
-                    ON_3dPoint ept;
-                    // Skip final parametric position to cheat floating point error
-                    while (t < t1)
-                    {
-                        trimCurve->EvPoint(t, uv);
-                        surf->EvPoint(uv.x, uv.y, ept);
-                        eptArray.Append(ept);
-                        //paramsArray.Append(t);
-                        t += delta;
-                    }
-
-                    // Evaluate the last parametric position separately
-                    // to make sure last curve point == first curve point
-                    trimCurve->EvPoint(t1, uv);
-                    surf->EvPoint(uv.x, uv.y, ept);
-                    eptArray.Append(ept);
-                    //paramsArray.Append(t1);
-
-                    ON_PolylineCurve* trimCurve3d = new ON_PolylineCurve(eptArray, paramsArray);
-                    //ON_NurbsCurve *trimCurve3dNurbs = trimCurve3d.NurbsCurve(nullptr, tolerance);
-
-                    // Append mapping to the 3-dimensional curve array
-                    int t3i = brep->AddEdgeCurve(trimCurve3d);
-
-                    // Construct start and end vertices of the 3-dimensional edge
-                    ON_BrepVertex& edgeVertexStart = brep->NewVertex(trimCurve3d->PointAtStart(), tolerance);
-                    //ON_BrepVertex& edgeVertexEnd = brep->NewVertex(trimCurve3d->PointAtEnd(), tolerance);
-
-                    // Construct a closed BRep edge
-                    //ON_BrepEdge &edge = brep->NewEdge(edgeVertexStart, edgeVertexEnd, t3i);
-                    ON_BrepEdge& edge = brep->NewEdge(edgeVertexStart, edgeVertexStart, t3i);
-                    edge.m_tolerance = tolerance;
-
-                    // Construct BRep trim loop (outer: ccw, inner: cw)
-                    ON_BrepLoop &loop = brep->NewLoop(ON_BrepLoop::inner, brep->m_F[0]);
-
-                    // Construct trim
-                    bool bRev3d = (trim.isMember("reversed")) ? !trim["reversed"].asBool() : true;
-                    ON_BrepTrim &trim = brep->NewTrim(edge, bRev3d, loop, t2i);
-                    trim.m_type = ON_BrepTrim::boundary;
-
-                    // Set trim tolerance
-                    trim.m_tolerance[0] = tolerance;
-                    trim.m_tolerance[1] = tolerance;
-                }
             }
-            // Set necessary trim flags
-            brep->SetTolerancesBoxesAndFlags(true);
         }
+        // Set necessary trim flags
+        brep->SetTolerancesBoxesAndFlags(true);
     }
 
     // Check if the BRep is valid
@@ -542,6 +468,85 @@ void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
 #endif
     if (!isValidBrep)
         brep->Destroy();
+}
+
+
+void constructBsplineTrimCurve(Json::Value& trim, Config& cfg, ON_Brep*& brep)
+{
+    // Tolerance
+    double tolerance = 10e-7;
+
+    // Construct the trim curve
+    ON_NurbsCurve* trimCurve;
+    constructCurveData(trim, cfg, trimCurve);
+
+    // Try to understand if the extracted trim curve is the edge of the surface
+    if (checkLinearBoundaryTrim(trimCurve))
+        return;
+
+    // Add trim curve to the BRep object
+    int t2i = brep->AddTrimCurve(trimCurve);
+    // If trim is valid, add trim sense, i.e. trim direction w.r.t. the face
+    if (t2i > -1)
+    {
+        // Get the surface
+        ON_Surface* surf = brep->m_S[0];
+
+        // Get domain of the 2-dimensional trim curve
+        double t0, t1;
+        trimCurve->GetDomain(&t0, &t1);
+
+        // Construct 3-dimensional mapping of the trim curve
+        double t = t0;
+        double delta = 0.001;
+        ON_3dPointArray eptArray;
+        ON_SimpleArray<double> paramsArray;
+        ON_3dPoint uv;
+        ON_3dPoint ept;
+        // Skip final parametric position to cheat floating point error
+        while (t < t1)
+        {
+            trimCurve->EvPoint(t, uv);
+            surf->EvPoint(uv.x, uv.y, ept);
+            eptArray.Append(ept);
+            //paramsArray.Append(t);
+            t += delta;
+        }
+
+        // Evaluate the last parametric position separately
+        // to make sure last curve point == first curve point
+        trimCurve->EvPoint(t1, uv);
+        surf->EvPoint(uv.x, uv.y, ept);
+        eptArray.Append(ept);
+        //paramsArray.Append(t1);
+
+        ON_PolylineCurve* trimCurve3d = new ON_PolylineCurve(eptArray, paramsArray);
+        //ON_NurbsCurve *trimCurve3dNurbs = trimCurve3d.NurbsCurve(nullptr, tolerance);
+
+        // Append mapping to the 3-dimensional curve array
+        int t3i = brep->AddEdgeCurve(trimCurve3d);
+
+        // Construct start and end vertices of the 3-dimensional edge
+        ON_BrepVertex& edgeVertexStart = brep->NewVertex(trimCurve3d->PointAtStart(), tolerance);
+        //ON_BrepVertex& edgeVertexEnd = brep->NewVertex(trimCurve3d->PointAtEnd(), tolerance);
+
+        // Construct a closed BRep edge
+        //ON_BrepEdge &edge = brep->NewEdge(edgeVertexStart, edgeVertexEnd, t3i);
+        ON_BrepEdge& edge = brep->NewEdge(edgeVertexStart, edgeVertexStart, t3i);
+        edge.m_tolerance = tolerance;
+
+        // Construct BRep trim loop (outer: ccw, inner: cw)
+        ON_BrepLoop& loop = brep->NewLoop(ON_BrepLoop::inner, brep->m_F[0]);
+
+        // Construct trim
+        bool bRev3d = (trim.isMember("reversed")) ? !trim["reversed"].asBool() : true;
+        ON_BrepTrim& trim = brep->NewTrim(edge, bRev3d, loop, t2i);
+        trim.m_type = ON_BrepTrim::boundary;
+
+        // Set trim tolerance
+        trim.m_tolerance[0] = tolerance;
+        trim.m_tolerance[1] = tolerance;
+    }
 }
 
 bool checkLinearBoundaryTrim(ON_NurbsCurve *trimCurve)
