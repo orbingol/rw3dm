@@ -533,8 +533,13 @@ void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
     }
 
     // Check if the BRep is valid
+    bool isValidBrep;
+#if _DEBUG
     ON_TextLog logger;
-    bool isValidBrep = brep->IsValid(&logger);
+    isValidBrep = brep->IsValid(&logger);
+#else
+    isValidBrep = brep->IsValid();
+#endif
     if (!isValidBrep)
         brep->Destroy();
 }
