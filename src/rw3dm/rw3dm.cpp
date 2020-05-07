@@ -346,7 +346,7 @@ void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data
     }
 }
 
-void constructCurveData(Json::Value &data, Config &cfg, ON_NurbsCurve *&nurbsCurve)
+void constructNurbsCurveData(Json::Value &data, Config &cfg, ON_NurbsCurve *&nurbsCurve)
 {
     // Control points array
     Json::Value ctrlpts = data["control_points"];
@@ -380,7 +380,7 @@ void constructCurveData(Json::Value &data, Config &cfg, ON_NurbsCurve *&nurbsCur
     }
 }
 
-void constructSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
+void constructNurbsSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
 {
     // Control points array
     Json::Value ctrlpts = data["control_points"];
@@ -486,7 +486,7 @@ void constructBsplineTrimCurve(Json::Value& trim, Config& cfg, ON_Brep*& brep)
 
     // Construct the trim curve
     ON_NurbsCurve* trimCurve;
-    constructCurveData(trim, cfg, trimCurve);
+    constructNurbsCurveData(trim, cfg, trimCurve);
 
     // Try to understand if the extracted trim curve is the edge of the surface
     if (checkLinearBoundaryTrim(trimCurve))

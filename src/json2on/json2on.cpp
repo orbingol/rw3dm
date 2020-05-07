@@ -52,14 +52,14 @@ bool json2on(std::string &jsonString, Config &cfg, std::string &fileName)
         if (root["shape"]["type"].asString() == "curve")
         {
             ON_NurbsCurve *geom;
-            constructCurveData(d, cfg, geom);
+            constructNurbsCurveData(d, cfg, geom);
             if (geom != nullptr)
                 model.AddManagedModelGeometryComponent(geom, nullptr);
         }
         if (root["shape"]["type"].asString() == "surface")
         {
             ON_Brep *geom;
-            constructSurfaceData(d, cfg, geom);
+            constructNurbsSurfaceData(d, cfg, geom);
             if (geom != nullptr)
                 model.AddManagedModelGeometryComponent(geom, nullptr);
         }

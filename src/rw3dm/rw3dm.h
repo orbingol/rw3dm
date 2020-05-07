@@ -40,8 +40,8 @@ void extractBrepData(const ON_Geometry *, Config &, Json::Value &);
 void extractExtrusionData(const ON_Geometry*, Config&, Json::Value&);
 
 // Geometry conversion (geomdl -> 3DM)
-void constructCurveData(Json::Value &, Config &, ON_NurbsCurve *&);
-void constructSurfaceData(Json::Value &, Config &, ON_Brep *&);
+void constructNurbsCurveData(Json::Value &, Config &, ON_NurbsCurve *&);
+void constructNurbsSurfaceData(Json::Value &, Config &, ON_Brep *&);
 
 // Trim curve conversion (geomdl -> 3DM)
 void constructBsplineTrimCurve(Json::Value &, Config &, ON_Brep *&);
