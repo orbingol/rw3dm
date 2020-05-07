@@ -71,7 +71,7 @@ bool on2json(std::string &fileName, Config &cfg, std::string &jsonString)
                 Json::Value data;
                 if (ON::curve_object == geometry->ObjectType() && cfg.extract_curves())
                 {
-                    extractCurveData(geometry, cfg, data);
+                    extractNurbsCurveData(geometry, cfg, data);
                 }
                 else
                 {

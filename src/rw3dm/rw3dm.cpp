@@ -34,7 +34,7 @@ void finalizeRwExt()
     ON::End();
 }
 
-void extractCurveData(const ON_Geometry* geometry, Config &cfg, Json::Value &data, double *paramOffset, double *paramLength)
+void extractNurbsCurveData(const ON_Geometry* geometry, Config &cfg, Json::Value &data, double *paramOffset, double *paramLength)
 {
     // We expect a curve object
     if (ON::object_type::curve_object != geometry->ObjectType())
@@ -290,7 +290,7 @@ void extractBrepData(const ON_Geometry* geometry, Config &cfg, Json::Value &data
 
                                 // Extract trim curve data
                                 Json::Value curveData;
-                                extractCurveData(trimCurve, cfg, curveData, paramOffset, paramLength);
+                                extractNurbsCurveData(trimCurve, cfg, curveData, paramOffset, paramLength);
 
                                 // Only add to the array if JSON output is not empty
                                 if (!curveData.empty())
