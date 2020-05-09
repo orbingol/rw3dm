@@ -408,17 +408,21 @@ void constructNurbsSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
     for (int idx = 0; idx < nurbsSurface->KnotCount(1); idx++)
         nurbsSurface->SetKnot(1, idx, data["knotvector_v"][idx + 1].asDouble());
 
+
     // Set control points
     for (int idxU = 0; idxU < nurbsSurface->CVCount(0); idxU++)
     {
         for (int idxV = 0; idxV < nurbsSurface->CVCount(1); idxV++)
         {
             int idx = surfaceCvIndex(idxU, idxV, sizeU, sizeV);
+            // Extract P
             Json::Value cptData = ctrlpts["points"][idx];
-            ON_3dPoint cpt(cptData[0].asDouble(), cptData[1].asDouble(), cptData[2].asDouble());
-            nurbsSurface->SetCV(idxU, idxV, cpt);
-            if (ctrlpts.isMember("weights"))
-                nurbsSurface->SetWeight(idxU, idxV, ctrlpts["weights"][idx].asDouble());
+            // Extract weight
+            double w = (ctrlpts.isMember("weights")) ? ctrlpts["weights"][idx].asDouble() : 1.0;
+            // OpenNURBS uses Pw format
+            ON_4dPoint cptw(cptData[0].asDouble() * w, cptData[1].asDouble() * w, cptData[2].asDouble() * w, w);
+            // Set control vertex in OpenNURBS data
+            nurbsSurface->SetCV(idxU, idxV, cptw);
         }
     }
 
