@@ -92,7 +92,7 @@ void extractNurbsCurveData(const ON_Geometry* geometry, Config &cfg, Json::Value
             {
                 double cp = vertex[c] / weight;
                 if (paramOffset != nullptr && paramLength != nullptr && cfg.normalize())
-                    point[c] = (cp- paramOffset[c]) / paramLength[c];
+                    point[c] = (cp - paramOffset[c]) / paramLength[c];
                 else
                     point[c] = cp;
             }
@@ -372,11 +372,20 @@ void constructNurbsCurveData(Json::Value &data, Config &cfg, ON_NurbsCurve *&nur
     // Set control points
     for (int idx = 0; idx < nurbsCurve->CVCount(); idx++)
     {
+        // Extract control point
         Json::Value cptData = ctrlpts["points"][idx];
-        ON_3dPoint cpt(cptData[0].asDouble(), cptData[1].asDouble(), (dimension == 2) ? 0.0 : cptData[2].asDouble());
-        nurbsCurve->SetCV(idx, cpt);
-        if (ctrlpts.isMember("weights"))
-            nurbsCurve->SetWeight(idx, ctrlpts["weights"][idx].asDouble());
+        // Extract weight
+        double w = (ctrlpts.isMember("weights")) ? ctrlpts["weights"][idx].asDouble() : 1.0;
+
+        // Create a control vertex
+        ON_4dPoint cptw;
+        cptw.x = cptData[0].asDouble() * w;
+        cptw.y = cptData[1].asDouble() * w;
+        cptw.z = (dimension == 2) ? 0.0 : cptData[2].asDouble() * w;
+        cptw.w = w;
+
+        // Set control vertex
+        nurbsCurve->SetCV(idx, cptw);
     }
 }
 
