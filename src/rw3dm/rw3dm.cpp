@@ -494,9 +494,6 @@ void constructNurbsSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
 
 void constructBsplineTrimCurve(Json::Value& trim, Config& cfg, ON_Brep*& brep)
 {
-    // Tolerance
-    double tolerance = 10e-7;
-
     // Construct the trim curve
     ON_NurbsCurve* trimCurve;
     constructNurbsCurveData(trim, cfg, trimCurve);
@@ -548,13 +545,13 @@ void constructBsplineTrimCurve(Json::Value& trim, Config& cfg, ON_Brep*& brep)
         int t3i = brep->AddEdgeCurve(trimCurve3d);
 
         // Construct start and end vertices of the 3-dimensional edge
-        ON_BrepVertex& edgeVertexStart = brep->NewVertex(trimCurve3d->PointAtStart(), tolerance);
+        ON_BrepVertex& edgeVertexStart = brep->NewVertex(trimCurve3d->PointAtStart(), RW3DM_VAR_TOLERANCE);
         //ON_BrepVertex& edgeVertexEnd = brep->NewVertex(trimCurve3d->PointAtEnd(), tolerance);
 
         // Construct a closed BRep edge
         //ON_BrepEdge &edge = brep->NewEdge(edgeVertexStart, edgeVertexEnd, t3i);
         ON_BrepEdge& edge = brep->NewEdge(edgeVertexStart, edgeVertexStart, t3i);
-        edge.m_tolerance = tolerance;
+        edge.m_tolerance = RW3DM_VAR_TOLERANCE;
 
         // Construct BRep trim loop (outer: ccw, inner: cw)
         ON_BrepLoop& loop = brep->NewLoop(ON_BrepLoop::inner, brep->m_F[0]);
@@ -565,8 +562,8 @@ void constructBsplineTrimCurve(Json::Value& trim, Config& cfg, ON_Brep*& brep)
         trim.m_type = ON_BrepTrim::boundary;
 
         // Set trim tolerance
-        trim.m_tolerance[0] = tolerance;
-        trim.m_tolerance[1] = tolerance;
+        trim.m_tolerance[0] = RW3DM_VAR_TOLERANCE;
+        trim.m_tolerance[1] = RW3DM_VAR_TOLERANCE;
     }
 }
 

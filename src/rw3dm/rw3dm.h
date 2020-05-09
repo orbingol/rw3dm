@@ -28,6 +28,10 @@ SOFTWARE.
 #include <opennurbs_public.h>
 #include <json/json.h>
 
+#ifndef RW3DM_VAR_TOLERANCE
+#define RW3DM_VAR_TOLERANCE 10e-7
+#endif
+
 // Framework initialization
 void initializeRwExt();
 void finalizeRwExt();
