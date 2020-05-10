@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8.2)
-project(rw3dm VERSION 2.1.3)
+project(rw3dm VERSION 2.1.4)
 
 # Generate a Visual Studio filter "CMakePredefinedTargets"
 if(MSVC)
