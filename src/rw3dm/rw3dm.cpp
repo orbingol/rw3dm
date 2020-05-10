@@ -510,6 +510,13 @@ void constructBsplineTrimCurve(Json::Value& trim, Config& cfg, ON_Brep*& brep)
         // Get the surface
         ON_Surface* surf = brep->m_S[0];
 
+        // Get surface domain
+        double st0_u, st1_u;
+        surf->GetDomain(0, &st0_u, &st1_u);
+        double st0_v, st1_v;
+        surf->GetDomain(1, &st0_v, &st1_v);
+
+
         // Get domain of the 2-dimensional trim curve
         double t0, t1;
         trimCurve->GetDomain(&t0, &t1);
@@ -525,18 +532,26 @@ void constructBsplineTrimCurve(Json::Value& trim, Config& cfg, ON_Brep*& brep)
         while (t < t1)
         {
             trimCurve->EvPoint(t, uv);
-            surf->EvPoint(uv.x, uv.y, ept);
-            eptArray.Append(ept);
-            //paramsArray.Append(t);
+            // Evaluate surface only if trim curve is on the surface
+            // Trim curve domain range == surface domain range
+            if ((uv.x >= st0_u) && (uv.x <= st1_u) && (uv.y >= st0_v) && (uv.y <= st1_v))
+            {
+                surf->EvPoint(uv.x, uv.y, ept);
+                eptArray.Append(ept);
+                //paramsArray.Append(t);
+            }
             t += delta;
         }
 
         // Evaluate the last parametric position separately
         // to make sure last curve point == first curve point
         trimCurve->EvPoint(t1, uv);
-        surf->EvPoint(uv.x, uv.y, ept);
-        eptArray.Append(ept);
-        //paramsArray.Append(t1);
+        if ((uv.x >= st0_u) && (uv.x <= st1_u) && (uv.y >= st0_v) && (uv.y <= st1_v))
+        {
+            surf->EvPoint(uv.x, uv.y, ept);
+            eptArray.Append(ept);
+            //paramsArray.Append(t);
+        }
 
         ON_PolylineCurve* trimCurve3d = new ON_PolylineCurve(eptArray, paramsArray);
         //ON_NurbsCurve *trimCurve3dNurbs = trimCurve3d.NurbsCurve(nullptr, tolerance);
