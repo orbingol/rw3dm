@@ -589,12 +589,14 @@ void constructBsplineTrimCurve(Json::Value& trim, Config& cfg, ON_Brep*& brep)
 void constructFreeformTrimCurve(Json::Value& trim, Config& cfg, ON_Brep*& brep)
 {
     // TO-DO
+    std::cout << "[WARNING] Extraction of freeform-type trim curves is not supported" << std::endl;
 }
 
 
 void constructContainerTrimCurve(Json::Value& trim, Config& cfg, ON_Brep*& brep)
 {
     // TO-DO
+    std::cout << "[WARNING] Extraction of container-type trim curves is not supported" << std::endl;
 }
 
 
