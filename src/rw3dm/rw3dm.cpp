@@ -488,7 +488,10 @@ void constructNurbsSurfaceData(Json::Value &data, Config &cfg, ON_Brep *&brep)
     isValidBrep = brep->IsValid();
 #endif
     if (!isValidBrep)
-        brep->Destroy();
+    {
+        //brep->Destroy();
+        std::cout << "[WARNING] Please check the trims (invalid BREP)" << std::endl;
+    }
 }
 
 
