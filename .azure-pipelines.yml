@@ -22,7 +22,6 @@ jobs:
     - script: cmake --build . --config Release --target install
     # publish
     - publish: $(System.DefaultWorkingDirectory)/build/install
-      artifactName: rw3dm_winx64
 
 - job: Linux
   pool:
@@ -41,7 +40,6 @@ jobs:
     - script: cmake --build . --config Release --target install
     # publish
     - publish: $(System.DefaultWorkingDirectory)/build/install
-      artifactName: rw3dm_ubuntu1804
 
 - job: MacOS
   pool:
@@ -60,4 +58,3 @@ jobs:
     - script: cmake --build . --config Release --target install
     # publish
     - publish: $(System.DefaultWorkingDirectory)/build/install
-      artifactName: rw3dm_macos
