@@ -13,7 +13,7 @@ jobs:
     - task: CMake@1
       inputs:
         workingDirectory: 'build'
-        cmakeArgs: '-G "Visual Studio 16 2019" -A x64 -DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=OFF'
+        cmakeArgs: '.. -G "Visual Studio 16 2019" -A x64 -DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=OFF'
     # build json2on
     - script: cmake --build . --config Release --target json2on
     # build on2json
@@ -31,7 +31,7 @@ jobs:
     - task: CMake@1
       inputs:
         workingDirectory: 'build'
-        cmakeArgs: '-DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=OFF'
+        cmakeArgs: '.. -DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=OFF'
     # build json2on
     - script: cmake --build . --config Release --target json2on
     # build on2json
@@ -49,7 +49,7 @@ jobs:
     - task: CMake@1
       inputs:
         workingDirectory: 'build'
-        cmakeArgs: '-DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=OFF'
+        cmakeArgs: '.. -DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=OFF'
     # build json2on
     - script: cmake --build . --config Release --target json2on
     # build on2json
