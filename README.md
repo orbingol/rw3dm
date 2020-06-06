@@ -1,6 +1,7 @@
 # RW3DM - Rhino Extensions for NURBS-Python (geomdl)
 
-[![Appveyor status](https://ci.appveyor.com/api/projects/status/gdawoy927oeex1dj?svg=true)](https://ci.appveyor.com/project/orbingol/rw3dm)
+[![Appveyor Status](https://ci.appveyor.com/api/projects/status/gdawoy927oeex1dj?svg=true)](https://ci.appveyor.com/project/orbingol/rw3dm) 
+[![Azure Status](https://dev.azure.com/quantumworx/rw3dm/_apis/build/status/orbingol.rw3dm?branchName=master)](https://dev.azure.com/quantumworx/rw3dm/_build/latest?definitionId=1&branchName=master)
 
 RW3DM project provides executables for exporting and importing OpenNURBS/Rhino .3DM files in JSON format.
 It utilizes [OpenNURBS](https://github.com/mcneel/opennurbs) library for reading and writing .3DM files
