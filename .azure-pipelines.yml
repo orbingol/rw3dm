@@ -1,11 +1,13 @@
 # Azure Pipelines configuration
+# https://dev.azure.com/quantumworx/rw3dm
 
 trigger:
     - master
     - azure-testing
 
 jobs:
-- job: Windows
+- job: Windows_Standalone
+  displayName: 'Windows Standalone'
   pool:
     vmImage: 'windows-latest'
   steps:
@@ -35,7 +37,39 @@ jobs:
     # publish
     - publish: $(System.DefaultWorkingDirectory)/build/install
 
+- job: Windows_DLL
+  displayName: 'Windows DLL'
+  pool:
+    vmImage: 'windows-latest'
+  steps:
+    # checkout
+    - checkout: self
+      submodules: true
+    # generate build system files
+    - task: CMake@1
+      inputs:
+        workingDirectory: 'build'
+        cmakeArgs: '.. -G "Visual Studio 16 2019" -A x64 -DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=ON'
+    # build json2on
+    - task: CMake@1
+      inputs:
+        workingDirectory: 'build'
+        cmakeArgs: '--build . --config Release --target json2on'
+    # build on2json
+    - task: CMake@1
+      inputs:
+        workingDirectory: 'build'
+        cmakeArgs: '--build . --config Release --target on2json'
+    # install
+    - task: CMake@1
+      inputs:
+        workingDirectory: 'build'
+        cmakeArgs: '--build . --config Release --target install'
+    # publish
+    - publish: $(System.DefaultWorkingDirectory)/build/install
+
 - job: Linux
+  displayName: 'Ubuntu 18.04'
   pool:
     vmImage: 'ubuntu-18.04'
   steps:
@@ -65,9 +99,10 @@ jobs:
     # publish
     - publish: $(System.DefaultWorkingDirectory)/build/install
 
-- job: MacOS
+- job: macOS
+  displayName: 'macOS X 10.15'
   pool:
-    vmImage: 'macos-latest'
+    vmImage: 'macOS-10.15'
   steps:
     # checkout
     - checkout: self
