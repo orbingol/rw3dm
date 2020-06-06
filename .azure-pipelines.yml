@@ -9,6 +9,9 @@ jobs:
   pool:
     vmImage: 'windows-latest'
   steps:
+    # checkout
+    - checkout: self
+      submodules: true
     # generate build system files
     - task: CMake@1
       inputs:
@@ -27,6 +30,9 @@ jobs:
   pool:
     vmImage: 'ubuntu-18.04'
   steps:
+    # checkout
+    - checkout: self
+      submodules: true
     # generate build system files
     - task: CMake@1
       inputs:
@@ -45,6 +51,9 @@ jobs:
   pool:
     vmImage: 'macos-latest'
   steps:
+    # checkout
+    - checkout: self
+      submodules: true
     # generate build system files
     - task: CMake@1
       inputs:
