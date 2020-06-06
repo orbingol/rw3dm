@@ -1,0 +1,63 @@
+# Azure Pipelines configuration
+
+trigger:
+    - master
+    - azure-testing
+
+jobs:
+- job: Windows
+  pool:
+    vmImage: 'windows-latest'
+  steps:
+    # generate build system files
+    - task: CMake@1
+      inputs:
+        workingDirectory: 'build'
+        cmakeArgs: '-G "Visual Studio 16 2019" -A x64 -DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=OFF'
+    # build json2on
+    - script: cmake --build . --config Release --target json2on
+    # build on2json
+    - script: cmake --build . --config Release --target on2json
+    # install
+    - script: cmake --build . --config Release --target install
+    # publish
+    - publish: $(System.DefaultWorkingDirectory)/build/install
+      artifactName: rw3dm_winx64
+
+- job: Linux
+  pool:
+    vmImage: 'ubuntu-18.04'
+  steps:
+    # generate build system files
+    - task: CMake@1
+      inputs:
+        workingDirectory: 'build'
+        cmakeArgs: '-DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=OFF'
+    # build json2on
+    - script: cmake --build . --config Release --target json2on
+    # build on2json
+    - script: cmake --build . --config Release --target on2json
+    # install
+    - script: cmake --build . --config Release --target install
+    # publish
+    - publish: $(System.DefaultWorkingDirectory)/build/install
+      artifactName: rw3dm_ubuntu1804
+
+- job: MacOS
+  pool:
+    vmImage: 'macos-latest'
+  steps:
+    # generate build system files
+    - task: CMake@1
+      inputs:
+        workingDirectory: 'build'
+        cmakeArgs: '-DRW3DM_BUILD_ON2JSON=ON -DRW3DM_BUILD_JSON2ON=ON -DRW3DM_BUILD_ON_DLL=OFF'
+    # build json2on
+    - script: cmake --build . --config Release --target json2on
+    # build on2json
+    - script: cmake --build . --config Release --target on2json
+    # install
+    - script: cmake --build . --config Release --target install
+    # publish
+    - publish: $(System.DefaultWorkingDirectory)/build/install
+      artifactName: rw3dm_macos
